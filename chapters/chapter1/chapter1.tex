@@ -1,18 +1,49 @@
 \chapter{Introduction}
 \section{Motivation}
-Recent advances in neural network architecture and  utilization of large amounts of data have led to astonishing results in fields such as image recognition, natural language processing, and speech recognition [add citations]. 
+Recent advances in neural network architecture and utilization of large amounts of data have led to astonishing results in fields such as image recognition, natural language processing, and speech recognition [add citations]. Many modern techniques such as long short term memory neural networks and convolution neural networks have been applied to time series forecasting and, while the results are promising, it remains to be seen whether such techniques can significantly outperform classical statistical methods \cite{makridakis2018statistical}. This opens the door for novel ideas to be tried and benchmarked against existing, classical methods.
 
-Unfortunately, it remains to be seen whether such techniques can significantly outperform classical statistical methods \cite{makridakis2018statistical}. This opens the door for novel ideas to be tried and benchmarked against existing methods. 
+In this thesis, we concern ourselves with abrupt regime changes in time series that indicate the beginning or end of significant trends of a time series. There are two main tasks in tackling this problem. The first is identifying when a time series has a collective outlier that is accurately discernible from noise and not simply a contextual outlier. The second is we would like regime changes to be detected as soon as possible. 
 
-Time series classification in general has seen extremely competitive results using nearest neighbour techniques \cite{bagnall2017great}. There are many variations on how to do this but fundamentally it involves a distance calculation between two sequences, followed by a one nearest neighbour classifier. The most common distance functions used for this is the Euclidean distance or some variant thereof. 
+Over the past decade, time series classification has seen extremely competitive results using simple nearest neighbour techniques \cite{bagnall2017great}. Fundamentally it involves a distance calculation between two sequences, followed by a one nearest neighbour classifier. The most common distance functions used for this is the Euclidean distance or some variant thereof. 
 
+\section{Previous Work}
+[make this more related to the exact problem you are solving not a literature review]
 
 Detecting abrupt changes in a time series is a common task in time series analysis and signal processing. Many outlier detection methods exist such as . A closely related topic is change point detection which focuses on discerning  when possible regime shifts occur in a time series. Here the regime shifts indicate collective outliers and are considered out of place when compared to another regime in the time series.
 
-\section{Previous Work}
-Broadly speaking there are two main categories that methods fall into, parametric and non-parametric modelling. 
+Broadly speaking there are two main categories that methods fall into, parametric and non-parametric modelling. Parametric models attempt to model the data directly through parametrization of the phenomenon being measured. This makes sense for data that are based on well-understood theoretical models or natural phenomenon. When no theoretical models exist and data is generated in then a non-parametric model is suitable.
 
-Nikolov et al. describe a latent source model that is a data-driven non-parametric classifier that detects trends on twitter using the counts of a twitter string or hash-tag. 
+\section{Latent Source Model}
+
+Nikolov et al.\cite{nikolov2012trend} describe a latent source model that is a data-driven non-parametric classifier that detects trends on twitter. They construct time series using the counts of a twitter string or hash-tag over time, binned at specific intervals. The approach taken is based on the assumption that there are fundamental behaviours that generate tweets when they trend compared to when they do not trend. These unknown fundamental behaviours are called \textit{latent sources}. 
+
+In this supervised learning setting, data is labelled with either ``trend" or ``no trend". Each labelled data point is referred to as a reference signal and is denoted as $r$. The entire a set of reference signals is denoted as $R$. Therefore, we have a binary classifier setting where a new data point is classified into sets $R+$ or $R-$, reflecting the set of trending signals and non-trending signals respectively. 
+
+Then with an out of sample time series, the distance between  
+
+The distance function is the sum of squares Euclidean distance:
+\begin{equation}
+d(r,s) = \sum_{i=1}^N (r_i - s_i)^2 
+\end{equation}
+For signals $s$ and $r$ of length $N$. Note that the squared Euclidean distance is not a metric as it does satisfy the triangle inequality. However, as the authors point out,  the function $d$ may be replaced by any symmetric, positive definite, and convex function. 
+
+Where the weighting is defined as:
+\begin{equation}
+W(r,s) = e^{-\lambda d(r,s)}
+\end{equation}
+Where the scaling parameter $\lambda$ can be thought of as a ``sphere of influence" that allows the user to tune the relative importance of a similar or dissimilar time series. For example, a large value of $\lambda$ generates very small weights for elements of $R$ that are very different from $s$.
+
+\begin{equation}
+\eta(s)=\frac{\mathbb{P}(+|s)}{\mathbb{P}{(-|s)}} =\frac{\sum_{r \in R+} W(r,s)}{\sum_{r \in R-}W(r,s)}
+\end{equation}
+The estimated classification of an observed time series, $s$, can then be defined as:
+\begin{equation}
+  \hat{L}(s)=\begin{cases}
+    +, & \text{if $\eta(s)>\theta$}.\\
+    -, & \text{if $\eta(s) \leq \theta$}.
+  \end{cases}
+\end{equation}
+Where $\theta$ defines the threshold for classification and typically is set to one, but can be tuned depending on the use case. For example, in cases where false positives are costly, the value of $\theta$ can be set to greater than $1$. 
 
 \section{Our Contributions}
 Lay out the contributions of this work.
