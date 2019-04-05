@@ -13,9 +13,20 @@ Detecting abrupt changes in a time series is a common task in time series analys
 
 Broadly speaking there are two main categories that methods fall into, parametric and non-parametric modelling. Parametric models attempt to model the data directly through parametrization of the phenomenon being measured. This makes sense for data that are based on well-understood theoretical models or natural phenomenon. When no theoretical models exist and data is generated in then a non-parametric model is suitable.
 
-\section{Latent Source Model}
+Another point brought up by dog \cite{aminikhanghahi2017survey} is the fact that
 
-Chen et al.  \cite{NIPS2013_5116} describe a \textit{latent source} for detecting sudden trends on twitter. The model is a data-driven, non-parametric classifier that is capable of classifying an observed, streaming time series as either a trending time series or not a trending time series. They construct the time series using the counts of a twitter string (or hash-tag) over time, binned at specific intervals. The approach taken is based on the assumption that there are fundamental behaviours that generate tweets when they trend compared to when they do not trend. These unknown fundamental behaviours are called \textit{latent sources}.  
+\section{Data Sources}
+
+Inspired by twitter trend detection research, the ultimate goal is to test our contribution on labelled twitter count data that have some mix of trending and non-trending sequences. Since this data would be costly to acquire and label. This will not be used to test the performance of this work. Instead, the following sources of data will be used:
+ \subsection{Synthetic datasets}
+ \subsection{Public datasets}
+\subsection{Private dataset}
+  
+\section{Latent Source Model}
+The set of examples
+$\mathcal{Y}$ is the set of possible labels ${0,1}$ to denote trend or no trend. Therefore, the learner will attempt to learn a model using the training set that is defined as $\mathcal{X} \times \mathcal{Y} : \mathcal{S} = ((x_1,y_1), (x_2,y_2)...(x_m,y_m))$. The term training set is used loosely here as no model parameters are actually learned.
+
+Chen et al.  \cite{NIPS2013_5116} describe a \textit{latent source} model for detecting sudden trends on twitter. The model is a data-driven, non-para metric classifier that is capable of classifying an observed, streaming time series as either a trending time series or not a trending time series. They construct the time series using the counts of a twitter string (or hash-tag) over time, binned at specific intervals. The approach taken is based on the assumption that there are fundamental behaviours that generate tweets when they trend compared to when they do not trend. These unknown fundamental behaviours are called \textit{latent sources}.  
 
 In this supervised learning setting, data is labelled with either ``trend" or ``no trend". Each labelled data point is referred to as a reference signal or latent source and is denoted as $r$. The entire a set of reference signals is denoted as $R$. Therefore, we have a binary classifier where a new data point is classified into sets $R+$ or $R-$, reflecting the set of trending signals and non-trending signals respectively. 
 
