@@ -8,9 +8,9 @@ The first is the nature of the data for the particular use case that the model w
 
 The second consideration is to determine what in what scenario the data is analysed. Some algorithms are off-line or batch algorithms in that they are applied in an ex post fashion after the dataset has been completely acquired. The first attempts are change point detection using control charts by Shewart were done in an on-line fashion as the data is streamed in a near, real-time fashion. In the literature, on-line methods of change point detection are also sometimes called sequential change point detection. For this thesis, we will use the terms interchangeably.  %It is possible to convert an on-line algorithm to an off-line algorithm by simply 
 
-The third consideration that is a consequence of detecting change points in an on-line setting is the presence of outliers. 
+The third consideration that is a consequence of detecting change points in an on-line setting is the presence of outliers. This a particularly important concern for on-line methods that are looking for changes in the underlying distribution of points, not a single anomalous data point
 
-The fourth consideration is determining if there are multiple change points or to assume there is only a single change point to detect. 
+The fourth consideration is determining if there are multiple change points or to assume there is only a single change point to detect. This is a more relevant consideration for off-line change point detection, but could also be relevant for the on-line case if a situation arises where the window of time series under consideration may contain more than one change point.
 
 \section{Previous Work}
 
@@ -27,6 +27,9 @@ Generally speaking, the fundamental change point problem is the following:
   \item $H_A: P_{X_m} \neq  P_{X_m+k} $
 \end{itemize}
 
+\subsection{Performance Measures}
+Add information about what performance measures will be used to determine the utility of algorithm. E.g. time to detection, F1 measure, etc.
+
 \section{Data Sources}
 
 Inspired by twitter trend detection research, the ultimate goal is to test our contribution on labelled twitter count data that have some mix of trending and non-trending sequences. Since this data would be costly to acquire and label. This will not be used to test the performance of this work. Instead, the following sources of data will be used:
@@ -36,6 +39,14 @@ Inspired by twitter trend detection research, the ultimate goal is to test our c
 \section{Review of 2017 Garreau PhD }
 This PhD is an extension on the 2012 paper by Arlot et al. \cite{arlot2012kernel} that proposes a type of kernel change point detection. Their non-parametric method is concerned with the off-line setting of detecting change points. They tackle the possibility of multiple change points.
 
+Fundamentally, their method is the kernel version of the following least squares optimization problem:
+
+
+The benefits of this kernel change point detection is that it operates on any kind of data for which a kernel that properly reproduces a Hilbert space can be applied. 
+
+His method is theoretically sound and tested but has not been implemented on very many real datasets nor compared with other benchmark methods. In an application setting, the user would use some training set to calibrate the kernel and the penalty parameters, to then be tested with appropriate accuracy measures on some out of sample data set.
+
+Possible extensions include testing his method on real world data sets and providing a comparison with other methods. Another extension is making an on-line version of his method. A harder extension would be automatic selection of a kernel based on the particular statistical moment that a user is interested in.
 
 \section{Our Contributions}
 Lay out the contributions of this work.
