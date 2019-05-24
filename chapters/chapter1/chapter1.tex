@@ -42,23 +42,52 @@ The basic change-point problem is set up as hypothesis test between two segments
     H_1: X_i \sim F_1, X_j \sim F_2 & \text{(a change-point occured)}. 
   \end{cases}
 \end{equation}
-Where $i=1,2,...,t-1$ and $j=t,...,n$  are two distinct segments separated by change-point $t$ that is within the time series window. Furthermore, $F_0, F_1,F2$ are cumulative distribution functions (CDFs) with corresponding probability density functions (PDFs), $f_0, f_1, f_2$. Because we are operating in a non-parametric setting, the CDFs are assumed to be completely unknown.
+Where $i=1,2,...,t-1$ and $j=t,...,n$  are two distinct segments separated by change-point $t$ that is within the time series window. Furthermore, $F_0, F_1,F2$ are cumulative distribution functions (CDFs) with corresponding probability density functions (PDFs), $f_0, f_1, f_2$. Because we are operating in a non-parametric setting, the CDFs are assumed to be completely unknown. 
+
+Many change-point detection algorithms define a statistic that is computed using each set before and after the possible change-point,$t$. If the statistic is above a particular threshold then time $t$ is classified as a change-point, $\hat{\tau}$.
+
+
+
+In the on-line scenario, the time series under consideration can be thought of as a sliding window with data constantly coming in and out of the window of interest. The size of the window is an important consideration that is typically chosen based on the problem being solved. Too small a window and the sets of data may not yield a statistically significant result. Too large of a window and the problem leans more towards and off-line model, where high volumes must be stored and several change-points may appear in a given window.
 
 \subsection{Performance Measures}
-Add information about what performance measures will be used to determine the utility of algorithm. E.g. time to detection, F1 measure, etc.
+Because of the unsupervised nature of detecting change-points, it is difficult to evaluate the performance of change-point detection models with real world data. Many papers detail asymptotic and non-asymptotic theoretical guarantees of their proposed change-point methods.  These theoretical optimalities are typically compared across different change-point methods for benchmarking a new algorithm. 
+
+Average run length is often used to compare A and B by Y. It is a function of $\theta$ and $N$ and is defined as:
+\begin{equation}
+ARL = E_{\theta}[N]
+\end{equation}
+Where it is the expected number of observations that must be recorded before a change-point is incorrectly detected. Therefore, a larger value of ARL is preferable. 
+
+Similarly, worst case detection delay is a metric that gives an idea of how slow a model will detect a  change-point in a worst case scenario.
+
+If labelled change-points are available for a real world dataset or a synthetic dataset is created, then the ground truth change-point vector, $\tau^*$, is known. For example the \textit{Hausdorff} metric can be used. It measures the furthest temporal distance between a predicted change-point $\hat{\tau}$ and $\tau^*$. It is defined as:
+
+Other standard classifier metrics can also used for comparing $\hat{\tau}$ and $\tau^*$. This includes the  F1-Score that is based on a classifier's precision and recall:
+\begin{equation}
+F_1(\hat{\tau}, \tau^*) = 2 * \frac{\text{precision*recall}}{\text{precision + recall}}
+\end{equation}
+
+ F1-Score is defined as the harmonic mean of precision and recall. Precision is defined as the ratio of true positives (TP) to the
+number of true positives (TP) and false positives (FP) and recall is defined as the ratio the number of true positives to the
+number of true positives plus the number of false negatives. F1-Score is best when F1 = 1 (perfect precision and recall) and reaches its worst value at F1 = 0. Depending on the context, any other classifier evaluation tools such as the Receiver Operating Characteristics Curve and the Precision Recall Curve may be used as well.
 
 \section{Related Work}
 
-In 2005, Desobry et al. \cite{desobry2005online} developed an on-line kernel change point detection model based on single class support vector machines ($\nu$-SVMs). The authors train a single class support vector on a past set, $\mathbf{x}_{t,1}={x_{t-m_1},...,x_{t-1}}$ of size $m_1$ and train another single class support vector on a future set $\mathbf{x}_{t,2}={x_t,...,x_{t+m_2-1}}$ of size $m_2$. A ratio is then computed between the two sets that acts as the dissimilarity measure in Hilbert space. If the points are sufficiently dissimilar over some predetermined threshold,$\eta$, then a change point is assigned to the time spitting the two sets of data.% Desobry argues that a dissimilarity measure between kernel projection of points in a Hilbert space should estimate the \textit{density supports} rather than estimate the probability distributions of each set of points. 
+In 2005, Desobry et al. \cite{desobry2005online} developed an on-line kernel change point detection model based on single class support vector machines ($\nu$-SVMs). The authors train a single class support vector on a past set, $\mathbf{x}_{t,1}={x_{t-m_1},...,x_{t-1}}$ of size $m_1$ and train another single class support vector on a future set $\mathbf{x}_{t,2}={x_t,...,x_{t+m_2-1}}$ of size $m_2$. A ratio is then computed between the two sets that acts as the dissimilarity measure in Hilbert space. If the points are sufficiently dissimilar over some predetermined threshold,$\eta$, then a change point is assigned to the time spitting the two sets of data. Desobry argues that a dissimilarity measure between kernel projection of points in a Hilbert space should estimate the \textit{density supports} rather than estimate the probability distributions of each set of points. 
 
 In 2007, Harchoui and Cappe \cite{harchaoui2007retrospective} approached the off-line change point problem with a fixed number of change points by using kernel change point detection. This was further extended to an unknown number of change points in 2012 by Arlot et al. \cite{arlot2012kernel}. Finally, Garreau and Arlot extended this in line of research kernel change points in the off-line setting of detecting change points. Fundamentally, their method is the kernel version of the following least squares optimization problem:
 
+\begin{equation}
+J(\tau, \mathbf{y}) = \frac{1}{n} \sum_{k=1}^K(\tau) \sum (Y_i - \hat(Y_k)^2 + \beta \text{pen}(\tau)
+\end{equation}
 
-\hl{The benefits of this kernel change point detection is that it operates on any kind of data for which a kernel that properly reproduces a Hilbert space can be applied.  %His method is theoretically sound and tested but has not been implemented on very many real datasets nor compared with other benchmark methods.
-In an application setting, the user would use some training set to calibrate the kernel and the penalty parameters, to then be tested with appropriate accuracy measures on some out of sample data set.}
 
+The benefits of this off-line kernel change point detection is that it operates on any kind of data for which a kernel that properly reproduces a Hilbert space can be applied. For example, it can be applied to image data, histogram data, as well as data in $\mathbb{R}^P$. Garreau shows their KCP procedure outputs an off-line segmentation near optimal with high probability. Lastly, the authors recommend choosing the kernel based on best possible signal to noise ratio that the distribution gives based on $ \Delta^2 / M^2$ . Therefore, some prior knowledge of the data is necessary for choosing the kernel. Finally, a comparison is made to the kernel two sample hypothesis test that is proposed in  \cite{li2015m} that uses  the kernel maximum mean discrepancy (MMD) B-test statistic for two-sample testing for rejecting null hypothesis of first equation.
 
-Other related work include a 2015 study by Li et al. \cite{li2015m} that propose the use of M-statistics based on the kernel maximum mean discrepancy (MMD) B-test statistic for two-sample testing.
+%His method is theoretically sound and tested but has not been implemented on very many real datasets nor compared with other benchmark methods.
+%In an application setting, the user would use some training set to calibrate the kernel and the penalty parameters, to then be tested with appropriate accuracy measures on some out of sample data set.
+
 %https://media.nips.cc/nipsbooks/nipspapers/paper_files/nips28/reviews/1852.html
 
  %The B-test statistic is a recently developed alternative to the MMD that is more efficient; it involves taking an average of the MMD over a partitioning of the data into N blocks.
