@@ -120,6 +120,23 @@ The filtered-derivative extension of the CUSUM introduced in X uses the change o
 
 Finally, since CUSUM is typically better at detecting small shifts in signals and the Shewart control chart is faster at detecting larger changes, the two can be combined. The combined Shewart-CUSUM algorithm leverages the strengths of both techniques for better overall performance. See \cite{lucas1982combined}, \cite{yashchin1985analysis}, and \cite{westgard1977combined} for more details. 
 
+\subsection{Maximum Mean Discrepancy}
+Based on the kernel mean embedding , the maximum mean discrepancy (MMD) is a type of integral probability metrics that can be used to compare two distributions. MMD can be thought of a distance metric
+
+For instance given the radial basis function kernel, $k(x, y)= e^{-\frac{1}{2\sigma^2}||x-y||^2}$
+
+The two-sample kernel test statistic is defined in \cite{gretton2012kernel} and uses the MMD metric as a distance measure for comparing two probability distributions. For example, suppose $n$ samples $X = \{x_1, x_2, ..., x_n\}$ and and $m$ samples from a different set $Y=\{y_1, y_2, ..., y_m\}$ are recorded. They are distributed as $X \sim  \mathbb{P}$ and $Y \sim \mathbb{Q}$ respectively. The MMD is defined by a feature map $\phi: X$
+
+Where the null hypothesis is that both samples stem from the same distribution,  (i.e. $P = Q$) and the alternative hypothesis is that they are not drawn from the same distribution such that $P \neq Q$.
+
+In [get citation], the estimated MMD is shown to be:
+
+\begin{align*}
+\widehat{\text{MMD}}(P,Q) &= \left| \left| \frac{1}{n}\sum_{i=1}^n \phi(x_i) - \frac{1}{m}\sum_{i=1}^m \phi(y_i) \right| \right|_{\mathcal{H}}^2 \\
+&= \frac{1}{n^2} \sum_{i=1}^n\sum_{j=1}^n k(x_i, x_j) + \frac{1}{m^2} \sum_{i=1}^m\sum_{j=1}^m k(y_i, y_j) - \frac{2}{nm} \sum_{i=1}^n\sum_{j=1}^m k(x_i, y_j) 
+\end{align*}
+Which by law of large numbers converges to the theoretical values at a rate of XX.
+
 \section{Related Work}
 
 In 2005, Desobry et al. \cite{desobry2005online} developed an on-line kernel change point detection model based on single class support vector machines ($\nu$-SVMs). The authors train a single class support vector on a past set, $\mathbf{x}_{t,1}={x_{t-m_1},...,x_{t-1}}$ of size $m_1$ and train another single class support vector on a future set $\mathbf{x}_{t,2}={x_t,...,x_{t+m_2-1}}$ of size $m_2$. A ratio is then computed between the two sets that acts as the dissimilarity measure in Hilbert space. If the points are sufficiently dissimilar over some predetermined threshold,$\eta$, then a change point is assigned to the time spitting the two sets of data. Desobry argues that a dissimilarity measure between kernel projection of points in a Hilbert space should estimate the \textit{density supports} rather than estimate the probability distributions of each set of points. 
@@ -133,13 +150,8 @@ J(\tau, \mathbf{y}) = \frac{1}{n} \sum_{k=1}^K(\tau) \sum (Y_i - \hat(Y_k)^2 + \
 
 The benefits of this off-line kernel change point detection is that it operates on any kind of data for which a kernel that properly reproduces a Hilbert space can be applied. For example, it can be applied to image data, histogram data, as well as $d-$dimensional vectors in $\mathbb{R}^d$. Garreau shows their KCP procedure outputs an off-line segmentation near optimal with high probability. Lastly, the authors recommend choosing the kernel based on best possible signal to noise ratio that the distribution gives based on $ \Delta^2 / M^2$ . Therefore, some prior knowledge or training set is necessary for calibrating the kernel. 
 
-In the on-line setting, several methods use kernel embeddings with a two-sample hypothesis test. This is done in a similar vein to the classic CUSUM and Shewart control charts. They all make use of the maximum mean discrepancy (MMD) test statistic for a two-sample kernel hypothesis test. The two-sample kernel test statistic  is defined in \cite{gretton2012kernel} as:
+In the on-line setting, several methods use kernel embeddings with a two-sample hypothesis test. This is done in a similar vein to the classic CUSUM and Shewart control charts. They all make use of the maximum mean discrepancy (MMD) test statistic for a two-sample kernel hypothesis test. 
 
-\begin{align*}
-\widehat{\text{MMD}}(P,Q) &= \left| \left| \frac{1}{n}\sum_{i=1}^n \phi(x_i) - \frac{1}{m}\sum_{i=1}^m \phi(y_i) \right| \right|_{\mathcal{H}}^2 \\
-&= \frac{1}{n^2} \sum_{i=1}^n\sum_{j=1}^n k(x_i, x_j) + \frac{1}{m^2} \sum_{i=1}^m\sum_{j=1}^m k(y_i, y_j) - \frac{2}{nm} \sum_{i=1}^n\sum_{j=1}^m k(x_i, y_j) 
-\end{align*}
-Where the null hypothesis is that both samples stem from the same distribution,  (i.e. $P = Q$) and the alternative hypothesis is that they are not drawn from the same distribution such that $P \neq Q$.
 
 In  \cite{li2015m}, the authors use the MMD hypothesis test by using a windowed approach where a fixed size of past data is compared with a fixed size of new data. They define a B-test statistic \hl{for two-sample testing for rejecting null hypothesis of first equation. The B-test statistic is a recently developed alternative to the MMD that is more efficient; it involves taking an average of the MMD over a partitioning of the data into N blocks.}%https://media.nips.cc/nipsbooks/nipspapers/paper_files/nips28/reviews/1852.html
 
