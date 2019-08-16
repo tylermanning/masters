@@ -121,21 +121,38 @@ The filtered-derivative extension of the CUSUM introduced in X uses the change o
 Finally, since CUSUM is typically better at detecting small shifts in signals and the Shewart control chart is faster at detecting larger changes, the two can be combined. The combined Shewart-CUSUM algorithm leverages the strengths of both techniques for better overall performance. See \cite{lucas1982combined}, \cite{yashchin1985analysis}, and \cite{westgard1977combined} for more details. 
 
 \subsection{Maximum Mean Discrepancy}
-Based on the kernel mean embedding , the maximum mean discrepancy (MMD) is a type of integral probability metrics that can be used to compare two distributions. MMD can be thought of a distance metric
+Based on the kernel mean embedding , the maximum mean discrepancy (MMD) is a type of \textit{integral probability metric} that can be used to compare two distributions \hl{[cite what IPM is from]. It is akin to the Kolmogorov distance between two distributions (which is the max norm of the difference between 2 cumulative distributions) or the Wassertstain distance.}
+% MMD can be thought of a distance metric
 
-For instance given the radial basis function kernel, $k(x, y)= e^{-\frac{1}{2\sigma^2}||x-y||^2}$
+The two-sample kernel test statistic is defined in \cite{gretton2012kernel} and uses the MMD as a distance measure for comparing two probability distributions. For example, suppose $n$ samples $X = \{x_1, x_2, ..., x_n\}$ and and $m$ samples from a different set $Y=\{y_1, y_2, ..., y_m\}$ are observed from a sample space $\mathcal{X}$. They are distributed as $X \sim  \mathbb{P}$ and $Y \sim \mathbb{Q}$ respectively. The goal is to determine if in fact the two distributions are the same. The MMD is defined by a feature map $\phi: \mathcal{X} \rightarrow \mathcal{H}$
 
-The two-sample kernel test statistic is defined in \cite{gretton2012kernel} and uses the MMD metric as a distance measure for comparing two probability distributions. For example, suppose $n$ samples $X = \{x_1, x_2, ..., x_n\}$ and and $m$ samples from a different set $Y=\{y_1, y_2, ..., y_m\}$ are recorded. They are distributed as $X \sim  \mathbb{P}$ and $Y \sim \mathbb{Q}$ respectively. The MMD is defined by a feature map $\phi: X$
+$$\text{MMD}(P,Q)=|| \mathbb{E}_{X \sim P}[\phi(X)] -  \mathbb{E}_{Y \sim Q}[\phi(Y)]||_\mathcal{H}$$
 
-Where the null hypothesis is that both samples stem from the same distribution,  (i.e. $P = Q$) and the alternative hypothesis is that they are not drawn from the same distribution such that $P \neq Q$.
+Where MMD can be understood as the distance in $\mathcal{H}$ between the kernel embeddings.
+Where the null hypothesis is that both samples stem from the same distribution,  (i.e. $\mathbb{P} = \mathbb{Q}$) and the alternative hypothesis is that they are not drawn from the same distribution such that $\mathbb{P} \neq \mathbb{Q}$.
 
-In [get citation], the estimated MMD is shown to be:
+In [get citation], the unbiased, estimate of the squared MMD is shown to be:
 
 \begin{align*}
-\widehat{\text{MMD}}(P,Q) &= \left| \left| \frac{1}{n}\sum_{i=1}^n \phi(x_i) - \frac{1}{m}\sum_{i=1}^m \phi(y_i) \right| \right|_{\mathcal{H}}^2 \\
-&= \frac{1}{n^2} \sum_{i=1}^n\sum_{j=1}^n k(x_i, x_j) + \frac{1}{m^2} \sum_{i=1}^m\sum_{j=1}^m k(y_i, y_j) - \frac{2}{nm} \sum_{i=1}^n\sum_{j=1}^m k(x_i, y_j) 
+\widehat{\mathbf{M M D}}_{u}^{2}(\mathcal{F}, X, Y)=\frac{1}{m(m-1)} \sum_{i=1}^m \sum_{ j=1}^{m} k\left(x_{i}, x_{j}\right)-\frac{2}{m n} \sum_{i=1}^m \sum_{ j=1}^{n} k\left(x_{i}, y_{j}\right)+\frac{1}{n(n-1)} \sum_{i=1}^n \sum_{j=1}^{n} k\left(y_{i}, y_{j}\right)
 \end{align*}
-Which by law of large numbers converges to the theoretical values at a rate of XX.
+Which by law of large numbers converges to the theoretical values at a rate of XX. On its own, the MMD is not a metric but it can be one if the chosen kernel,$k$, is a \textit{characteristic kernel}. That is, the kernel mean embedding is injective in the mapping into the reproducing kernel Hilbert space. This property is critical as it ensures MMD=0 if and only if $\mathbb{P}=\mathbb{Q}$. As [cite KME review] points out, there is no loss if information in this case.
+
+For instance given the radial basis function kernel, $k(x, y)= e^{-\frac{1}{2\sigma^2}||x-y||^2}$.
+
+\hl{REWORD: We call the function that achieves the supremum, the witness function because it is the function that witnesses the difference in the two distributions. This means that we can interpret the witness function as showing where the estimated densities of
+p and q are most different.}
+
+The witness function 
+\begin{equation}
+f(x)=\mathbb{E}_{x^{\prime} \sim p}\left[k\left(x, x^{\prime}\right)\right]-\mathbb{E}_{x^{\prime} \sim q}\left[k\left(x, x^{\prime}\right)\right]
+\end{equation}
+
+which can also be estimated from finite samples of data by:
+\begin{equation}
+\hat{f}(x)=\frac{1}{m} \sum_{i=1}^{m} k\left(x, x_{i}\right)-\frac{1}{n} \sum_{i=1}^{n} k\left(x, y_{i}\right)
+\end{equation}
+Thus, as [need citation] points at, the witness function tracks where the densities of $X$ and $Y$ are most different.
 
 \section{Related Work}
 
@@ -155,7 +172,13 @@ In the on-line setting, several methods use kernel embeddings with a two-sample 
 
 In  \cite{li2015m}, the authors use the MMD hypothesis test by using a windowed approach where a fixed size of past data is compared with a fixed size of new data. They define a B-test statistic \hl{for two-sample testing for rejecting null hypothesis of first equation. The B-test statistic is a recently developed alternative to the MMD that is more efficient; it involves taking an average of the MMD over a partitioning of the data into N blocks.}%https://media.nips.cc/nipsbooks/nipspapers/paper_files/nips28/reviews/1852.html
 
-Finally, in a recent, preprint paper, a kernel CUSUM algorithm is proposed, where the classic CUSUM algorithm is adapted using the MMD statistic for on-line detection. While this non-parametric approach can detect any change in the distribution of a sequence, it does struggle with more complicated distributional changes such as higher moments changes in a single dimension.
+More recently in \cite{chang2019kernel}, a  kernel change-point detection method is proposed that uses deep generative models to augment the test power of the kernel two sample test statistic. The method is compared to other prominent change-point methods for on-line and off-line detection of change detection. All comparisons done on synthetic data are with piece-wise i.i.d. data. All methods are benchmarked using the AUC metric for classification performance and it is shown the KL-CPD method is competitive or better than state of the art methods such as \hl{find out which ones}. However, for on-line change-point tests, the authors did not use time to detection as a metric for comparison. It would be interesting to see how this trade-off compares to competing on-line methods.
+
+Finally, in a recent, preprint paper, a kernel CUSUM (KCUSUM) algorithm is proposed, where the classic CUSUM algorithm is adapted using the MMD statistic for on-line detection. The authors use a modified, unbiased MMD statistic that can be computed in linear time. This formulation of the MMD statistic was originally defined in section 6 of \cite{gretton2012kernel} as:
+
+$$\operatorname{MMD}_{l}^{2}[\mathcal{F}, X, Y] :=\frac{1}{m_{2}} \sum_{i=1}^{m_{2}} h\left(\left(x_{2 i-1}, y_{2 i-1}\right),\left(x_{2 i}, y_{2 i}\right)\right)$$
+
+While this non-parametric approach can detect any change in the distribution of a sequence, it does struggle with more complicated distributional changes such as higher moments changes in a single dimension.
 
 %In 2016, James et al. \cite{james2016leveraging} proposed using energy statistics to test the significance of a change point that is robust to anomalies. They point out that their work is the first to accurately detect change points with fast time to detection while not being affected by extreme outliers that are not change points. They compare their E-divisive with medians algorithm to the parametric PELT technique. 
  
