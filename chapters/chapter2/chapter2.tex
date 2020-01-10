@@ -48,3 +48,7 @@ The algorithm functions as follows, every two observations, the MMD$_l$ is calcu
 Besides its speed of computation, an additional benefit of MMD$_l$ is it is normally distributed under the null distribution unlike the quadratically-calculated MMD. This facilitates analysis of bounds and provides statistical guarantees for worst-case detection delays and time to false alarm rate. While this non-parametric approach can detect any change in the distribution of a sequence, it does struggle with more complicated distributional changes such as variance changes of a single dimension and changes beyond first and second-order moments.
 
 %In 2016, James et al. \cite{james2016leveraging} proposed using energy statistics to test the significance of a change point that is robust to anomalies. They point out that their work is the first to accurately detect change points with fast time to detection while not being affected by extreme outliers that are not change points. They compare their E-divisive with medians algorithm to the parametric PELT technique. 
+
+\section{Our Approach}
+
+This section describes our novel method for change-point detection.

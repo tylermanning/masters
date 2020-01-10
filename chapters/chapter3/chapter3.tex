@@ -2,15 +2,33 @@
 \section{Datasets}
 A common difficulty in change-point detection is evaluating the performance of an algorithm with datasets that aren't overly simplistic and difficult enough to ascertain some real world use.
 
-Unlike fields like image recognition or XXX, there are no standard datasets that are widely used across literature for evaluating new methods. Most papers propose experiments that are relevant for the specific problem they are trying to solve  but lack examples or explanations of when their method would not be applicable.  Furthermore, because change-point evolved out of the statistics literature, many papers focus on theoretical results and provide minor experimental results if any.
+Unlike fields like image recognition where datasets like MNIST provide a common benchmark, there are no standard datasets that are widely used across the change-point detection literature for evaluating new methods. Most papers propose experiments that are relevant for the specific problem they are trying to solve  but lack examples or explanations of when their method would not be applicable.  Furthermore, because change-point evolved out of the statistics literature, many papers focus on theoretical results and provide minor experimental results if any.
 
 Given the empirical focus of this thesis, we attempt to put together the most comprehensive, controlled experiments using both synthetic and real-world datasets.
 \subsection{Synthetic Datasets}
 To the best of our knowledge, no change-point detection paper covers as many variations as presented in this thesis. While synthetic datasets are idealistic in their formulation, they provide a good starting point for comparing different methods because many variables can be controlled for. Often in the real world, the exact location of change-points is not known. Therefore, it is important for the evaluation of a change-point detection algorithm that it performs competitively on synthetic data.
 
-Inspired by recent papers \cite{chang2019kernel} and \cite{flynn2019change} that attempt to bridge the gap between the statistics and machine-learning literature, the following synthetic datasets are created: jumping mean, scaling variance, alternating between two Gaussian mixtures, and alternating between random distributions.
+Inspired by recent papers \cite{chang2019kernel} and \cite{flynn2019change} that attempt to bridge the gap between the statistics and machine-learning literature, the following synthetic datasets are created: change in mean, scaling variance, alternating between two Gaussian mixtures, and alternating between random distributions. It is truly hard to properly generalize all the possible situations a non-parametric algorithm may be used in, but the synthetic cases presented in this thesis are common across domains and cover a range of applications.
+
+For a change in mean, a change-point is inserted in the time series at some random time where the mean is shifted either positively or negatively. There are two variants to this scenario. In the first, the mean change is in all dimensions simultaneously. In the second variation, the mean change is in only one dimension making it harder to detect. 
 
 For each experiment above, a Monte-Carlo approach is used to estimate time to false alarm, detection delay, and test power. 
 
 \subsection{Real World Datasets}
-Subsection Test
+In addition to synthetic datasets, several real datasets that are publicly available are also used. 
+
+\begin{tabular}{SSSSSS} \toprule
+    {Dataset} & {Type} & {No. of Dimensions} & {Length} & {No. of Changepoints}  \\ \midrule
+    1  & {Synthetic} & +8.872 & 16.128 & 1.402  \\
+    2  & {Synthetic}  & -2.509 & 3.442  & 0.299  \\
+    3  & {Synthetic}  & -2.509 & 3.442  & 0.299  \\
+    4 & {Synthetic}  & -2.509 & 3.442  & 0.299  \\
+    5  & {Synthetic}  & -2.509 & 3.442  & 0.299  \\
+    6  & {Synthetic}  & -2.509 & 3.442  & 0.299  \\
+    7  & {Real}  & -0.363 & 1.826  & 0.159  \\
+    8 & {Real}  & -0.597 & 0.598  & 0.052  \\ \bottomrule
+\end{tabular}
+\captionof{table}{Datasets Summary}
+
+
+
