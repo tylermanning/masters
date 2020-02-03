@@ -35,7 +35,7 @@ Finally, the last factor to address is determining exactly what kinds of statist
 
 This thesis will concern itself with on-line change point detection, where data is received in a streaming nature. We assume no prior distributional characteristics on the data and operate in a completely non-parametric setting. 
 
-\section{Problem Formulation}
+\section{Background}
 This sections describes how the change-point problem will be formulated in this thesis and, by extension, how all methods will be described using the change-point detection problem notation. Because online change-point detection is closely related to two sample testing, a background on statistical hypothesis testing is presented first. 
 
 \subsection{Hypothesis Testing}
@@ -59,6 +59,66 @@ Many two sample tests exist for tackling the different types of differences two 
 
 Non-parametric tests also exist such as the Kolmogorov-Smirnov test (K-S test) for determining whether two samples come from the same distribution. This is done by computing the \textit{supremum} of the difference of the empirical cumulative distribution functions from each sample. That is, $\text{KS statistic} =\text{sup} |P(x) - Q(x)|$. Depending on the number of samples and the significance level chosen, the K-S statistic may reject or fail to reject the null hypothesis. The K-S test does not specify what distribution the samples come from, only if they differ according to the K-S statistic. More recently, the kernel two-sample test was introduced in \cite{gretton2012kernel} as a very flexible, non-parametric test. It is not limited to one dimensional data, and can be applied to non-numeric data. It is based on the \textit{maximum mean discrepancy} (MMD) criterion and is capable of detecting any kind of change in statistical moment. It is a focus in this thesis and is discussed in further detail in section \ref{mmd}.
 
+\subsection{Maximum Mean Discrepancy}
+\label{mmd}
+The maximum mean discrepancy (MMD) is a type of \textit{integral probability metric} that can be used to compare two probability distributions. It is based on the kernel mean embedding developed in \cite{smola2007hilbert}. The kernel mean embedding can be thought of applying the \textit{kernel trick} to probability measures and mapping them into a higher dimensional feature space. Rather than applying the kernel trick to individual data points and mapping them to an implicit feature space, the kernel mapping, $\phi$, (also called feature map) will be applied to a probability distribution in order to represent in a reproducing kernel Hilbert space (RKHS), that is $\phi: \mathcal{X} \rightarrow \mathcal{H}$.
+
+Suppose $n$ samples $X = \{x_1, x_2, ..., x_n\}$ and and $m$ samples from a different set $Y=\{y_1, y_2, ..., y_m\}$ are observed from a sample space $\mathcal{X}$. They are distributed as $X \sim  P$ and $Y \sim Q$ respectively. The kernel mean embeddings are represented by $\mu_P = \mathbb{E}_{X \sim P}[\phi(X)] $ and $\mu_Q =\mathbb{E}_{Y \sim Q}[\phi(Y)]$ for samples $X$ and $Y$ respectively. It is not required but typically a \textit{characteristic} kernel function is chosen as it guarantees the mapping into the Hilbert space to be injective. As \cite{muandet2017kernel} points out, there is no loss if information in this case. See \cite{fukumizu2008kernel} for this proof. This implies that $||\mu_P - \mu_Q ||=0$ if and only if $P=Q$. This leads naturally to the definition of the MMD as:
+
+\begin{equation}
+\text{MMD}(P,Q)=|| \mathbb{E}_{X \sim P}[\phi(X)] -  \mathbb{E}_{Y \sim Q}[\phi(Y)]||_\mathcal{H}
+\end{equation}
+
+Where the MMD distance can be understood as the distance in $\mathcal{H}$ between the mean embeddings of the features. As long as a kernel mean embedding can be defined on the given data structure, the MMD can be used. This is why it can be applied to non-numeric data such as strings, graphs, and other data structures \cite{hofmann2008kernel}. One advantage of using the MMD approach for comparing distributions over other classic techniques like Kullback–Leibler (K-L) divergence is the density of the distributions do not have to be estimated as an interim step. 
+
+The two-sample kernel test statistic is defined in \cite{gretton2012kernel} and uses the MMD as a distance measure for comparing two probability distributions. Where the null hypothesis is that both samples stem from the same distribution,  (i.e. $P=Q$) and the alternative hypothesis is that they are not drawn from the same distribution such that $P \neq Q$.
+
+In \cite{gretton2012kernel}, the unbiased, estimate of the squared MMD is shown to be:
+
+\begin{equation}
+\begin{split}
+\widehat{\mathbf{M M D}}_{u}^{2}(\mathcal{F}, X, Y)=\frac{1}{m(m-1)} \sum_{i=1}^m \sum_{ j=1}^{m} k\left(x_{i}, x_{j}\right)-\frac{2}{m n} \sum_{i=1}^m \sum_{ j=1}^{n} k\left(x_{i}, y_{j}\right)+ \\
+\frac{1}{n(n-1)} \sum_{i=1}^n \sum_{j=1}^{n} k\left(y_{i}, y_{j}\right)
+\end{split}
+\end{equation}
+
+
+%Which by law of large numbers converges to the theoretical values at a rate of XX. 
+%On its own, the MMD is not a metric but it can be one if the chosen kernel,$k$, is a \textit{characteristic kernel}. 
+
+Common kernel functions used in practice are the radial basis function kernel, $k(x, y)= e^{-\frac{1}{2\sigma^2}||x-y||^2}$ and laplace kernel, $k(x, y)= e^{-\frac{1}{\sigma^2}||x-y||}$, where $\sigma > 0$. In \cite{gretton2005kernel}, the authors recommend selecting the bandwidth kernel, $\sigma$, based on the \textit{median heuristic}, which results in $\sigma^2=\text{median}\{||x_i-x_j||:i,j = 1,...,n\}$. This heuristic is a good starting point, however, it has been shown to be sub-optimal in high-dimensional and small-sample cases as shown in \cite{muandet2014kernel} and \cite{ramdas2015decreasing}. Choosing the proper kernel is often done on a per case basis by maximizing test power, thereby reducing the chance of Type-II error. Overall kernel selection is a difficult problem that is still actively researched.
+
+\hl{REWORD: We call the function that achieves the supremum, the witness function because it is the function that witnesses the difference in the two distributions. This means that we can interpret the witness function as showing where the estimated densities of
+p and q are most different.}
+
+The witness function 
+\begin{equation}
+f(x)=\mathbb{E}_{x^{\prime} \sim p}\left[k\left(x, x^{\prime}\right)\right]-\mathbb{E}_{x^{\prime} \sim q}\left[k\left(x, x^{\prime}\right)\right]
+\end{equation}
+
+which can also be estimated from finite samples of data by:
+\begin{equation}
+\hat{f}(x)=\frac{1}{m} \sum_{i=1}^{m} k\left(x, x_{i}\right)-\frac{1}{n} \sum_{i=1}^{n} k\left(x, y_{i}\right)
+\end{equation}
+Thus, as [need citation] points at, the witness function tracks where the densities of $X$ and $Y$ are most different. 
+
+Originally in \cite{gretton2012kernel}, it was thought the MMD does not suffer from the curse of dimensionaity when used to compare distributions in higher dimensions. However, it was shown in \hl{https://arxiv.org/pdf/1406.2083.pdf} that indeed the MMD does struggle in higher dimensions like many other metrics do.
+
+\subsection{MMD as a two-sample test}
+As mentioned in \hl{hypothesis testing section}, every two-sample test follows a similar procedure, therefore using the MMD as a measure of distance, the steps to perform a two-sample test  are as follows:
+
+1.Distance MMD2k(P,Q):
+
+Choose a kernel $k$
+For characteristic $k$, k(P,Q)=0 iff P=Q
+2.Estimate the distribution distance from data: MMD(X,Y)
+3.Choose a rejection threshold calpha:
+
+Under H0, mMMD converges to distribution depending on data, k
+
+Kernel selection is important because it decides the kind of witness functions that can be learned. For most applications it is simply set to the RBF kernel but ideally it should be selected based on maximizing test power.
+
+\section{Problem Formulation}
 
 \subsection{Change-point Detection Problem}
 The basic change-point problem is set up as hypothesis test between two segments of a time series. Let $X_i,...,X_n$ be a series of independent random variables of dimension $d \geq 1$ be sequentially observed . Then, one of the following hypotheses holds:
@@ -158,39 +218,6 @@ More generally, if a function, $g(x)$ is applied to the observations such that w
 
 As with the other methods previously mentioned, the standard EWMA is a parametric method as it assumes the time series has some in-control average that is known prior to use. This makes is difficult to apply in situations where the data is non-numeric or where third or fourth moment changes in the distribution occur. It is however very fast due to its recursive structure and does not hold a lot of data in memory making it appealing for live data streams that rely on quick processing.
 
-\section{Maximum Mean Discrepancy}
-\label{mmd}
-Based on the kernel mean embedding , the maximum mean discrepancy (MMD) is a type of \textit{integral probability metric} that can be used to compare two distributions. It is non-parametric and can be applied to numeric data as well as non-numeric data such as text, graphs, images.
-
-The two-sample kernel test statistic is defined in \cite{gretton2012kernel} and uses the MMD as a distance measure for comparing two probability distributions. For example, suppose $n$ samples $X = \{x_1, x_2, ..., x_n\}$ and and $m$ samples from a different set $Y=\{y_1, y_2, ..., y_m\}$ are observed from a sample space $\mathcal{X}$. They are distributed as $X \sim  P$ and $Y \sim Q$ respectively. The goal is to determine if in fact the two distributions are the same. The MMD is defined by a feature map $\phi: \mathcal{X} \rightarrow \mathcal{H}$
-
-$$\text{MMD}(P,Q)=|| \mathbb{E}_{X \sim P}[\phi(X)] -  \mathbb{E}_{Y \sim Q}[\phi(Y)]||_\mathcal{H}$$
-
-Where MMD distance can be understood as the distance in $\mathcal{H}$ between the mean embeddings of the features.
-Where the null hypothesis is that both samples stem from the same distribution,  (i.e. $P=Q$) and the alternative hypothesis is that they are not drawn from the same distribution such that $P \neq Q$.
-
-In \cite{gretton2012kernel}, the unbiased, estimate of the squared MMD is shown to be:
-
-\begin{align*}
-\widehat{\mathbf{M M D}}_{u}^{2}(\mathcal{F}, X, Y)=\frac{1}{m(m-1)} \sum_{i=1}^m \sum_{ j=1}^{m} k\left(x_{i}, x_{j}\right)-\frac{2}{m n} \sum_{i=1}^m \sum_{ j=1}^{n} k\left(x_{i}, y_{j}\right)+\frac{1}{n(n-1)} \sum_{i=1}^n \sum_{j=1}^{n} k\left(y_{i}, y_{j}\right)
-\end{align*}
-Which by law of large numbers converges to the theoretical values at a rate of XX. On its own, the MMD is not a metric but it can be one if the chosen kernel,$k$, is a \textit{characteristic kernel}. That is, the kernel mean embedding is injective in the mapping into the reproducing kernel Hilbert space. This property is critical as it ensures MMD=0 if and only if $P=Q$. As [cite KME review] points out, there is no loss if information in this case.
-
-For instance given the radial basis function kernel, $k(x, y)= e^{-\frac{1}{2\sigma^2}||x-y||^2}$.
-
-\hl{REWORD: We call the function that achieves the supremum, the witness function because it is the function that witnesses the difference in the two distributions. This means that we can interpret the witness function as showing where the estimated densities of
-p and q are most different.}
-
-The witness function 
-\begin{equation}
-f(x)=\mathbb{E}_{x^{\prime} \sim p}\left[k\left(x, x^{\prime}\right)\right]-\mathbb{E}_{x^{\prime} \sim q}\left[k\left(x, x^{\prime}\right)\right]
-\end{equation}
-
-which can also be estimated from finite samples of data by:
-\begin{equation}
-\hat{f}(x)=\frac{1}{m} \sum_{i=1}^{m} k\left(x, x_{i}\right)-\frac{1}{n} \sum_{i=1}^{n} k\left(x, y_{i}\right)
-\end{equation}
-Thus, as [need citation] points at, the witness function tracks where the densities of $X$ and $Y$ are most different. 
 
 \section{Our Contributions}
 The contributions of this work are several fold. First, given the strong emphasis of theoretical results in the change-point detection community, we test classic on-line change-point algorithms with modern, competitive algorithms on synthetic data and real-world data. Classification error as well as time to detection are compared as on-line methods are tasked with balancing this trade-off and comparisons between algorithms that leave out one of the these two key metrics out is incomplete. The focus of recent algorithms is on kernel methods such as KCUSUM, NEWMA and Mstats-CPD. 
