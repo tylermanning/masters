@@ -1,6 +1,6 @@
 \chapter{Introduction}
 \section{Motivation}
-The use of statistical control charts for detecting real-time changes in variation was pioneered by Walter Shewart in the first half of the twentieth century.  Shewart was interested in reducing the unexpected causes of variation in the manufacturing processes that produced faulty manufacturing equipment \cite{shewhart1931economic}. Shewart's method involved charting the process measurements over time and detecting when a statistical process was no longer exhibiting an expected level of variation. Once this detection occurred, the process was stopped and was not restarted until the cause of the variation was fixed.
+In the first half of the twentieth century, the use of statistical control charts for detecting real-time changes in variation was pioneered by Walter Shewart.  Shewart was interested in reducing the unexpected causes of variation in the manufacturing processes that produced faulty manufacturing equipment \cite{shewhart1931economic}. Shewart's method involved charting the process measurements over time and detecting when a statistical process was no longer exhibiting an expected level of variation. Once this detection occurred, the process was stopped and was not restarted until the cause of the variation was fixed.
 Shewart's control charts were one of the first formal frameworks to solve the problem of detecting changes in a distribution of a sequence of random variables. This problem is now known more generally as the \textit{change point detection problem}. Many industries make use of change-point techniques including healthcare monitoring systems, monitoring computer network traffic, and detecting regime shifts financial markets. The following are a few motivating examples.
 
 \subsection{Health Care}
@@ -51,9 +51,9 @@ Two-sample hypothesis testing concerns itself with the following problem: Suppos
 
 In order to summarize the difference between the two samples, a test statistic, $\hat{t} \in \mathbb{R}$, is computed based on the type of test used. This test statistic is compared to a significance level, $\alpha \in [0,1]$ that is chosen  at the outset. Common choices for $\alpha$ are $0.1, 0.05$ and $0.01$. In other words the p-value$=\mathbb{P}(T>\hat{t}|H_0$.
 
-Given the two possible outcomes of a two-sample sample test, it is clear the hypothesis test can fail in two ways. The first is rejecting the null hypothesis when it is correct. This is known as a false-positive or a type-I error and is upper-bounded by the chosen significance level, $ \alpha$.  Therefore the probability of falsely rejecting the null hypothesis is $ 1 - \alpha = \mathbb{P}(\text{reject } H_0 | H_0 \text{ is true})$. The second possible source of error, is  a type-II error or false negative and the probability of committing a type-II error is $\beta$. The quantity $1-\beta$ is referred to as the \textit{power} of a test. It is equivalent to \(P\left(\text { reject } H_{0} | H_{0} \text { is false }\right)\). Maximizing test power is an important part of designing new algorithms and this metric is typically used as a metric to compare different methods. Often there is a trade-off  between type-I and type-II error and the practitioner must decide how to balance the two given their domain-specific knowledge of the problem. In some cases, it may be desirable to sacrifice one for the other, such as in medical field where a false positive diagnosis is a more desirable outcome than missing a diagnosis (type-II error) and never giving treatment to a patient. 
+Given the two possible outcomes of a two-sample sample test, it is clear the hypothesis test can fail in two ways. The first is rejecting the null hypothesis when it is correct. This is known as a false-positive or a type-I error and is upper-bounded by the chosen significance level, $ \alpha$.  Therefore the probability of falsely rejecting the null hypothesis is $ 1 - \alpha = \mathbb{P}(\text{reject } H_0 | H_0 \text{ is true})$. The second possible source of error, is  a type-II error or false negative. The probability of committing a type-II error is denoted as $\beta$. The quantity $1-\beta$ is referred to as the \textit{power} of a test. It is equivalent to $\mathbb{P}\left(\text { reject } H_{0} | H_{0} \text { is false }\right)\). Maximizing test power is an important part of designing new algorithms and this measure is typically used to compare different methods. Often there is a trade-off  between type-I and type-II error and the practitioner must decide how to balance the two given their domain-specific knowledge of the problem. In some cases, it may be desirable to sacrifice one for the other, such as in medical field where a false positive diagnosis is a more desirable outcome than missing a diagnosis (type-II error) which would result in never giving treatment to a patient. 
 
-Many two sample tests exist for tackling the different types of differences two samples may have. For example, the Student $t$-test is a two sample test for determining if two samples of univariate data come from a population with the same mean. A generalization of the Student $t$-test for the multivariate case is the Hotelling $T^2$ test that tests whether multivariate means of two samples are significantly different. Both of these are parametric tests as they assume the samples are normally distributed. 
+Many two sample tests exist for tackling the different types of differences two samples may have. For example, the Student $t$-test is a two sample test for determining if two samples of univariate data come from a population with the same mean. A generalization of the Student $t$-test for the multivariate case is the Hotelling $T^2$ test that tests whether the means of two multivariate samples are significantly different. Both of these are parametric tests as they assume the samples are normally distributed. 
 
 % Add citation for Hotelling, H. (1931). The Generalization of Student’s Ratio. Ann. Math. Statist., 2(3):360–378.
 
@@ -63,13 +63,15 @@ Non-parametric tests also exist such as the Kolmogorov-Smirnov test (K-S test) f
 \label{mmd}
 The maximum mean discrepancy (MMD) is a type of \textit{integral probability metric} that can be used to compare two probability distributions. It is based on the kernel mean embedding developed in \cite{smola2007hilbert}. The kernel mean embedding can be thought of applying the \textit{kernel trick} to probability measures and mapping them into a higher dimensional feature space. Rather than applying the kernel trick to individual data points and mapping them to an implicit feature space, the kernel mapping, $\phi$, (also called feature map) will be applied to a probability distribution in order to represent in a reproducing kernel Hilbert space (RKHS), that is $\phi: \mathcal{X} \rightarrow \mathcal{H}$.
 
-Suppose $n$ samples $X = \{x_1, x_2, ..., x_n\}$ and and $m$ samples from a different set $Y=\{y_1, y_2, ..., y_m\}$ are observed from a sample space $\mathcal{X}$. They are distributed as $X \sim  P$ and $Y \sim Q$ respectively. The kernel mean embeddings are represented by $\mu_P = \mathbb{E}_{X \sim P}[\phi(X)] $ and $\mu_Q =\mathbb{E}_{Y \sim Q}[\phi(Y)]$ for samples $X$ and $Y$ respectively. It is not required but typically a \textit{characteristic} kernel function is chosen as it guarantees the mapping into the Hilbert space to be injective. As \cite{muandet2017kernel} points out, there is no loss if information in this case. See \cite{fukumizu2008kernel} for this proof. This implies that $||\mu_P - \mu_Q ||=0$ if and only if $P=Q$. This leads naturally to the definition of the MMD as:
+Suppose $n$ samples from a set $X = \{x_1, x_2, ..., x_n\}$ and and $m$ samples from a different set $Y=\{y_1, y_2, ..., y_m\}$ are observed from a sample space $\mathcal{X}$. They are distributed as $X \sim  P$ and $Y \sim Q$ respectively. The kernel mean embeddings are represented by $\mu_P = \mathbb{E}_{X \sim P}[\phi(X)] $ and $\mu_Q =\mathbb{E}_{Y \sim Q}[\phi(Y)]$ for samples $X$ and $Y$ respectively. 
+
+It is not required but typically a \textit{characteristic} kernel function is chosen as it guarantees the mapping into the Hilbert space to be injective. As \cite{muandet2017kernel} points out, there is no loss if information in this case. See \cite{fukumizu2008kernel} for this proof. This implies that $||\mu_P - \mu_Q ||=0$ if and only if $P=Q$. This leads naturally to the definition of the MMD as:
 
 \begin{equation}
 \text{MMD}(P,Q)=|| \mathbb{E}_{X \sim P}[\phi(X)] -  \mathbb{E}_{Y \sim Q}[\phi(Y)]||_\mathcal{H}
 \end{equation}
 
-Where the MMD distance can be understood as the distance in $\mathcal{H}$ between the mean embeddings of the features. As long as a kernel mean embedding can be defined on the given data structure, the MMD can be used. This is why it can be applied to non-numeric data such as strings, graphs, and other data structures \cite{hofmann2008kernel}. One advantage of using the MMD approach for comparing distributions over other classic techniques like Kullback–Leibler (K-L) divergence is the density of the distributions do not have to be estimated as an interim step. 
+Where the MMD can be understood as the distance in $\mathcal{H}$ between the mean embeddings of the features. As long as a kernel mean embedding can be defined on the given data structure, the MMD can be used. This is why it can be applied to non-numeric data such as strings, graphs, and other data structures \cite{hofmann2008kernel}. One advantage of using the MMD for comparing distributions over other classic techniques like Kullback–Leibler (K-L) divergence is the density of the distributions do not have to be estimated as an interim step. 
 
 The two-sample kernel test statistic is defined in \cite{gretton2012kernel} and uses the MMD as a distance measure for comparing two probability distributions. Where the null hypothesis is that both samples stem from the same distribution,  (i.e. $P=Q$) and the alternative hypothesis is that they are not drawn from the same distribution such that $P \neq Q$.
 
@@ -86,7 +88,9 @@ In \cite{gretton2012kernel}, the unbiased, estimate of the squared MMD is shown 
 %Which by law of large numbers converges to the theoretical values at a rate of XX. 
 %On its own, the MMD is not a metric but it can be one if the chosen kernel,$k$, is a \textit{characteristic kernel}. 
 
-Common kernel functions used in practice are the radial basis function kernel, $k(x, y)= e^{-\frac{1}{2\sigma^2}||x-y||^2}$ and laplace kernel, $k(x, y)= e^{-\frac{1}{\sigma^2}||x-y||}$, where $\sigma > 0$. In \cite{gretton2005kernel}, the authors recommend selecting the bandwidth kernel, $\sigma$, based on the \textit{median heuristic}, which results in $\sigma^2=\text{median}\{||x_i-x_j||:i,j = 1,...,n\}$. This heuristic is a good starting point, however, it has been shown to be sub-optimal in high-dimensional and small-sample cases as shown in \cite{muandet2014kernel} and \cite{ramdas2015decreasing}. Choosing the proper kernel is often done on a per case basis by maximizing test power, thereby reducing the chance of Type-II error. Overall kernel selection is a difficult problem that is still actively researched.
+Common kernel functions used in practice are the radial basis function kernel, $k(x, y)= e^{-\frac{1}{2\sigma^2}||x-y||^2}$ and the laplace kernel, $k(x, y)= e^{-\frac{1}{\sigma^2}||x-y||}$, where $\sigma > 0$. In \cite{gretton2005kernel}, the authors recommend selecting the bandwidth kernel, $\sigma$, based on the \textit{median heuristic}, which results in $\sigma^2=\text{median}\{||x_i-x_j||:i,j = 1,...,n\}$. This heuristic is a good starting point, however, it has been shown to be sub-optimal in high-dimensional and small-sample cases as shown in \cite{muandet2014kernel} and \cite{ramdas2015decreasing}. Choosing the proper kernel is often done on a per case basis by maximizing test power, thereby reducing the chance of Type-II error. Overall kernel selection is a difficult problem that is still actively researched.
+
+Originally in \cite{gretton2012kernel}, it was thought the MMD does not suffer from the curse of dimensionaity when used to compare distributions in higher dimensions. However, it was shown in \hl{https://arxiv.org/pdf/1406.2083.pdf} that indeed the MMD does struggle in higher dimensions like many other metrics do.
 
 \hl{REWORD: We call the function that achieves the supremum, the witness function because it is the function that witnesses the difference in the two distributions. This means that we can interpret the witness function as showing where the estimated densities of
 p and q are most different.}
@@ -101,10 +105,8 @@ which can also be estimated from finite samples of data by:
 \hat{f}(x)=\frac{1}{m} \sum_{i=1}^{m} k\left(x, x_{i}\right)-\frac{1}{n} \sum_{i=1}^{n} k\left(x, y_{i}\right)
 \end{equation}
 Thus, as [need citation] points at, the witness function tracks where the densities of $X$ and $Y$ are most different. 
+Kernel selection is important because it decides the kind of witness functions that can be learned. For most applications it is simply set to the RBF kernel but ideally it should be selected based on maximizing test power.
 
-Originally in \cite{gretton2012kernel}, it was thought the MMD does not suffer from the curse of dimensionaity when used to compare distributions in higher dimensions. However, it was shown in \hl{https://arxiv.org/pdf/1406.2083.pdf} that indeed the MMD does struggle in higher dimensions like many other metrics do.
-
-\subsection{MMD as a two-sample test}
 As mentioned in \hl{hypothesis testing section}, every two-sample test follows a similar procedure, therefore using the MMD as a measure of distance, the steps to perform a two-sample test  are as follows:
 
 1.Distance MMD2k(P,Q):
@@ -116,7 +118,6 @@ For characteristic $k$, k(P,Q)=0 iff P=Q
 
 Under H0, mMMD converges to distribution depending on data, k
 
-Kernel selection is important because it decides the kind of witness functions that can be learned. For most applications it is simply set to the RBF kernel but ideally it should be selected based on maximizing test power.
 
 \section{Problem Formulation}
 
@@ -174,19 +175,19 @@ number of true positives plus the number of false negatives. F1-Score is best wh
 Presented below are the fundamental approaches to on-line change-point detection that have been very influential. 
 
 \subsection{Shewart Control Chart}
-Shewart control charts were originally designed to detect changes in the mean of a process where the values being observed are assumed to be Gaussian distributed. As the data arrives, the data is batched into samples of size $N$.  The sample mean, $\bar{X}=\frac{1}{N} \sum_{i=1}^N X_i$, is the then calculated and compared it to a known, true mean $\mu^*$. If the absolute difference is greater than a threshold, then a change-point is declared at the current batch. Therefore, the decision rule is defined as,
+Shewart control charts were originally designed to detect changes in the mean of a process where the values being observed are assumed to be Gaussian distributed. As the data arrives, the data is batched into samples of size $N$. The sample mean, $\bar{X}=\frac{1}{N} \sum_{i=1}^N X_i$, is the then calculated and compared it to a known, true mean $\mu^*$. If the absolute difference is greater than a threshold, then a change-point is declared at the current batch. Therefore, the decision rule is defined as,
 \begin{equation}
 |\bar{X}-\mu^*| > \kappa \frac{\sigma}{\sqrt{N}}
 \end{equation}
 
-Where $\kappa$ is a constant that controls how sensitive the algorithm is. Typically, it is set to $\kappa=3$ as this coincides with the observations within $3$ standard deviations of the mean.  Under the assumption that the data is distributed normally, $99.7$ of the observations are distributed in this region, therefore a change-point is declared if it falls outside this region.The true mean is assumed to known and is defined as $\mu^* = \mathbb{E}[X_i]$. In applications, the true mean can also be replaced by some target specification that a process must adhere to. Similarly, it is assumed the standard deviation, $\sigma$, is known in advance but it can also be estimated.
+Where $\kappa$ is a constant that controls how sensitive the algorithm is. Typically, it is set to $\kappa=3$ as this coincides with the observations within $3$ standard deviations of the mean. Under the assumption that the data is distributed normally, $99.7$ of the observations are distributed in this region, therefore a change-point is declared if it falls outside this region. The true mean is assumed to known and is defined as $\mu^* = \mathbb{E}[X_i]$. In applications, the true mean can also be replaced by some target specification that a process must adhere to. Similarly, it is assumed the standard deviation, $\sigma$, is known in advance but it can also be estimated.
 
 Tuning the hyper-parameters can drastically change the performance of the algorithm. Choosing a lower value for $\kappa$ makes the control chart detect change-points more often, whereas a higher value results in less detections. The chosen sample size, $N$, is also critical and its effect on the performance of Shewart control charts was studied in \cite{haridy2017effect}.
 
 \subsection{CUSUM}
 Similar to the Shewart control chart, the CUSUM algorithm tracks a statistic over time relative to a predetermined threshold. CUSUM is best applied to a process that is already under control. It can be thought of accumulating the information of current and past samples. 
 
-The algorithm can be recursively defined by updating a statistic, $S_i$, after each $X_i$, such that:
+The algorithm is defined by a statistic, $S_i$,  that is recursively updated after each sample, $X_i$, is observed, such that:
 \begin{equation}
   \begin{cases}
     S_0 = 0  & \text{(Initialization)} \\
@@ -197,7 +198,6 @@ Where $Z_i=ln(\frac{f_{\theta_1}(X_i)}{f_{\theta_0}(X_i)})$ and the statistic $S
 
 As a parametric algorithm, it is assumed the distributions, $f_0$ and $f_1$, are known at the outset. In most applications, this is quite limiting and unrealistic. Therefore, in cases where parameters $\theta_0$ and $\theta_1$ are unknown, maximum likelihood estimates of the parameters are usually computed.
 
-\subsection{Extensions to CUSUM}
 The filtered-derivative extension of the CUSUM introduced in \\cite{basseville1981edge} uses the change of the discrete derivative of a signal over time to detect a change-point. 
 
 In \cite{lucas1982fast}, a fast initial response (FIR) CUSUM algorithm is proposed where the starting value of initial cumulative sums adapts over time. Instead of resetting $S_0$ to zero as shown above, it is reset to a non-zero value, typically based on the threshold chosen. This gives the algorithm a head-start in quickly detecting when a process is out of control and is especially useful for processes that don't start in control.
@@ -205,7 +205,7 @@ In \cite{lucas1982fast}, a fast initial response (FIR) CUSUM algorithm is propos
 Finally, since CUSUM is typically better at detecting small shifts in signals and the Shewart control chart is faster at detecting larger changes, the two can be combined. The combined Shewart-CUSUM algorithm leverages the strengths of both techniques for better overall performance. See \cite{lucas1982combined}, \cite{yashchin1985analysis}, and \cite{westgard1977combined} for more details. 
 
 \subsection{EWMA}
-The exponentially weighted moving average as described in \cite{roberts1959control} (originally called a geometric average), is a type of moving average that applies exponentially weighting. First introduced as a forecasting technique in the econometrics field for smoothing noisy functions, the EWMA can also be used for determining out of control processes as shown in \cite{hunter1986exponentially}. Rather than weight all observations uniformly like the standard CUSUM algorithm or a simple moving average, a decay factor (also called a  forgetting factor), $\lambda$, is used to control how much weight is distributed over the previous observations. As each new observation arrives, the EWMA statistic is updated and compared to a threshold. If the EWMA statistic exceeds the threshold then the process is deemed out of control or, in other words, a change-point is detected.
+First described in \cite{roberts1959control} as a "geometric average", the exponentially weighted moving average (EWMA) is a type of moving average that applies exponential weighting to samples. First introduced as a forecasting technique in the econometrics field for smoothing noisy functions, the EWMA can also be used for determining out of control processes as shown in \cite{hunter1986exponentially}. Rather than weight all observations uniformly like the standard CUSUM algorithm or a simple moving average, a decay factor (also called a  forgetting factor), $\lambda$, is used to control how much weight is distributed over the previous observations. As each new observation arrives, the EWMA statistic is recursively updated and compared to a threshold. If the EWMA statistic exceeds the threshold then the process is deemed out of control or, in other words, a change-point is detected.
 
 The EWMA statistic is calculated as follows at each time step, $t$:
 $$S_t = \lambda X_t + (1-\lambda)S_{t-1} $$
@@ -220,4 +220,4 @@ As with the other methods previously mentioned, the standard EWMA is a parametri
 
 
 \section{Our Contributions}
-The contributions of this work are several fold. First, given the strong emphasis of theoretical results in the change-point detection community, we test classic on-line change-point algorithms with modern, competitive algorithms on synthetic data and real-world data. Classification error as well as time to detection are compared as on-line methods are tasked with balancing this trade-off and comparisons between algorithms that leave out one of the these two key metrics out is incomplete. The focus of recent algorithms is on kernel methods such as KCUSUM, NEWMA and Mstats-CPD. 
+The contributions of this work are several fold. First, given the strong emphasis of theoretical results in the change-point detection community, we test classic on-line change-point algorithms with modern, competitive algorithms on synthetic data and real-world data. Classification error as well as time to detection are compared as on-line methods are tasked with balancing this trade-off and comparisons between algorithms that leave out one of the these two key metrics out is incomplete. The focus of recent algorithms is on kernel methods such as KCUSUM, NEWMA and Mstats-CPD the will be discussed in Chapter 2.
