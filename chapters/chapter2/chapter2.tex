@@ -1,56 +1,128 @@
-\chapter{Kernel Changepoint Detection}
+\chapter{Background}
+This chapter describes how the change point problem will be formulated in this thesis and, by extension, how all methods will be described using the change point detection problem notation. Because online change point detection is closely related to two sample testing, a background on statistical hypothesis testing is presented first. 
 
-\section{Related Work}
+\section{Hypothesis Testing}
 
-One of the first papers to use the term kernel change-point detection was in \cite{desobry2005online}. The authors present an on-line kernel change point detection model based on single class support vector machines ($\nu$-SVMs). They train a single class support vector on a past set, $\mathbf{x}_{t,1}={x_{t-m_1},...,x_{t-1}}$ of size $m_1$ and train another single class support vector on a future set $\mathbf{x}_{t,2}={x_t,...,x_{t+m_2-1}}$ of size $m_2$. A ratio is then computed between the two sets that acts as the dissimilarity measure in Hilbert space. If the points are sufficiently dissimilar over some predetermined threshold,$\eta$, then a change point is assigned to the time spitting the two sets of data. The authors argue that a dissimilarity measure between kernel projection of points in a Hilbert space should estimate the \textit{density supports} rather than estimate the probability distributions of each set of points. While this approach inspired a lot of interesting research that will be discussed below, modern approaches have proven to be more practical.
-
-In 2007, Harchoui and Cappe \cite{harchaoui2007retrospective} approached the off-line change point problem with a fixed number of change points by using kernel change point detection. This was further extended to an unknown number of change points in 2012 by Arlot et al. \cite{arlot2012kernel}. Finally, Garreau and Arlot extended this in line of research kernel change points in the off-line setting of detecting change points. Fundamentally, their method is the kernel version of the following least squares optimization problem:
+Two-sample hypothesis testing concerns itself with the following problem: Suppose data is independently sampled from two groups of different populations. Sample one has is denoted as  $X=\{X_1, X_2, ...,X_n\} \sim P$ and sample two is denoted as $Y=\{Y_1, Y_2, ...,Y_m\} \sim Q$, where $n$ and $m$ are the number of data points for $X$ and $Y$ respectively. The fundamental question of a two-sample test is determining whether samples are $X$ and $Y$ are significantly different on a statistical level. Therefore, a two-sample hypothesis test can be setup where the null hypothesis, $H_0$, is that the two distributions do not differ based on some statistical test. 
 
 \begin{equation}
-J(\tau, \mathbf{y}) = \frac{1}{n} \sum_{k=1}^K(\tau) \sum (Y_i - \hat(Y_k)^2 + \beta \text{pen}(\tau)
+  \begin{cases}
+    H_0: P = Q & \text{(both samples come from the same distribution)} \\
+    H_1: P \neq Q & \text{(samples do not come from the same distribution)}. 
+  \end{cases}
 \end{equation}
 
+If the null hypothesis is rejected, then the alternative hypothesis, $H_1$, is accepted and we conclude the two samples differ in their distributions according to the specific two-sample test used. The type of two-sample test used indicates how the distributions differ.  
 
-The benefits of this off-line kernel change point detection is that it operates on any kind of data for which a kernel that properly reproduces a Hilbert space can be applied. For example, it can be applied to image data, histogram data, as well as $d-$dimensional vectors in $\mathbb{R}^d$. Garreau shows their KCP procedure outputs an off-line segmentation near optimal with high probability. Lastly, the authors recommend choosing the kernel based on best possible signal to noise ratio that the distribution gives based on $ \Delta^2 / M^2$ . Therefore, some prior knowledge or training set is necessary for calibrating the kernel. 
+The general procedure of a two-sample test is the following: first, a test statistic, $\hat{t} \in \mathbb{R}$, is computed based on the type of test used and the observed data. This test statistic is compared to a significance level, $\alpha \in [0,1]$ that is chosen  at the outset. Common choices for $\alpha$ are $0.1, 0.05$ and $0.01$. Finally, a \textit{p-value} is calculated using the test statistic. The p-value is the probability of observing $\hat{t}$ under the null hypothesis, such that the p-value$=\mathbb{P}(T>\hat{t}|H_0)$. A low p-value < $\alpha$ would be improbable under the null hypothesis, therefore, in this situation it is rejected and the alternative hypothesis is accepted.
 
-In  \cite{li2015m}, the authors make use of the B-test introduced in \cite{zaremba2013b} and develop an offline and online change-point detection algorithm called the MStats algorithm. The authors also refer to this algorithm as the Scan-B algorithm in a follow-up paper. At each time-step, the online model samples new data from a window of size $B_0$ and does a B-test with $N$ past samples that are kept as reference samples. 
+Given the two possible outcomes of a two-sample sample test, it is clear the hypothesis test can fail in two ways. The first is rejecting the null hypothesis when it is correct. This is known as a false-positive or a type-I error and is upper-bounded by the chosen significance level, $ \alpha$. It is equivalent to following conditional probability: $\mathbb{P}(\text{reject } H_0 | H_0 \text{ is true})$. The second possible source of error is  a type-II error or false negative. The probability of committing a type-II error is denoted as $\beta$ and is equivalent to $\mathbb{P}\left(\text {accept } H_{0} | H_{0} \text { is false}\right)\). The quantity $1-\beta$ is referred to as the \textit{power} of a test. Maximizing test power is an important part of designing new algorithms and is typically used to compare different methods. Often there is a trade-off  between type-I and type-II error and the practitioner must decide how to balance the two given their domain-specific knowledge of the problem. In some cases, it may be desirable to sacrifice one for the other, such as in medical field where a false positive diagnosis is a more desirable outcome than missing a diagnosis (type-II error) which would result in never giving treatment to a patient. 
 
-$$Z_{B_{0}, t}:=\frac{1}{N} \sum_{i=1}^{N} \operatorname{MMD}_{u}^{2}\left(X_{i}^{\left(B_{0}, t\right)}, Y^{\left(B_{0}, t\right)}\right)$$
+Many two sample tests exist for tackling the different types of differences two samples may have. For example, the Student $t$-test is a two sample test for determining if two samples of univariate data come from a population with the same mean. A generalization of the Student $t$-test for the multivariate case is the Hotelling $T^2$ test that tests whether the means of two multivariate samples are significantly different \cite{hotelling1992generalization}. Both of these are parametric tests as they assume the samples are normally distributed. 
 
-The resulting test statistic is then normalized by $Z_{B_{0}, t}/\sqrt{Var[Z_{B_0}]}$ where the authors provide a theoretical calculation of $\text{Var}[Z_B]$. If the normalized test statistic exceeds some predefined threshold then a change-point is declared. The B-test is memoryless in the sense that the statistic is calculated each time and only the value of the last calculation has any weight. This is similar to a control chart that calculates a z-score at each iteration. Adjusting the size of the window, $B_0$, results in the usual trade-off of performance in online change-point detection. A smaller block size will have a smaller computational cost and a smaller detection delay but will result in a worse test power resulting in higher type II error.
+Non-parametric tests also exist such as the Kolmogorov-Smirnov test (K-S test) for determining whether two univariate samples come from the same distribution. This is done by computing the \textit{supremum} of the difference of the empirical cumulative distribution functions from each sample. That is, $\text{KS statistic} =\text{sup} |P(x) - Q(x)|$. The K-S test does not specify what distribution the samples come from, only if they differ according to the K-S statistic. More recently, the kernel two-sample test was introduced in \cite{gretton2012kernel} as a very flexible, non-parametric test. It is not limited to one dimensional data, and can be applied to non-numeric data. It is based on the \textit{maximum mean discrepancy} (MMD) criterion and is capable of detecting any kind of change in distribution. It is a focus in this thesis and is discussed in further detail in section \ref{mmd}.
 
-From here, theoretical bounds are developed for the average run length and expected detection delay. Experiments are done on real-data sets including a speech dataset  and the Human Activity Sensing Consortium (HASC) dataset where the performance was better than the relative density-ratio (RDR) algorithm described in \cite{liu2013change}.
+\section{Problem Formulation}
 
-More recently in \cite{chang2019kernel}, a  kernel change-point detection method is proposed that uses deep generative models to augment the test power of the kernel two sample test statistic. They point out MMD's lack of test power when using limited samples from the new distribution, $Q$, which may easily leading to over-fitting with kernels. Thus they use a generative adversarial neural network (GAN), trained on historical samples of $X \sim  P$  with noise injected into $X$. This surrogate distribution is then used in conjunction with possible change-points to improve the test power of a modified MMD measure that makes use of compositional kernels.
+\subsection{change point Detection Problem}
+The basic change point problem is set up as hypothesis test between two segments of a time series. Let $X_i,...,X_n$ be a series of independent random variables of dimension $d \geq 1$ be sequentially observed . Then, one of the following hypotheses holds:
+\begin{equation}
+  \begin{cases}
+    H_0: X_1, X_2, ...,X_n \sim  P & \text{(no change point occured)} \\
+    H_1: X_1,X_2, X_{t_0-1} \sim P, X_{t_0}, X_{t_0+1},  \sim Q & \text{(a change point occured)}. 
+  \end{cases}
+\end{equation}
+Where $i=1,2,...,t_0-1$ and $j=t_0,...,n$  are two distinct segments separated by change point $t_0$ that is within the time series window.  Because we are operating in a non-parametric setting, the distributions $P, Q$ are assumed to be completely unknown. 
 
-The method is compared to other prominent change-point methods for off-line  change detection such as the aforementioned MStats-KCPD, LSTNet, and Gaussian process change-point models. All comparisons are done on synthetic data with piece-wise i.i.d. data. All methods are benchmarked using the AUC metric for classification performance and it is shown the KL-CPD method is competitive or better than state of the art methods.  Furthermore, the AUC performance is maintained as the dimensionality of the data is increased, making their kernel learning framework very interesting for future off-line change-point detection. It remains to be seen if this framework can be adopted in an on-line context where time to detection is a key constraint on practicality.
+If there is no change in the data then we say the change time is equal to infinity and denote this probability as $P^{\infty}$ and the expectation is $E^{\infty}$.
 
-In the on-line setting, several methods use kernel embeddings with a two-sample hypothesis test. This is done in a similar vein to the classic CUSUM and Shewart control charts. They all make use of the maximum mean discrepancy (MMD) test statistic for a two-sample kernel hypothesis test. 
+Many change point detection algorithms define a statistic that is computed using each set before and after the possible change point,$t$. If the statistic is above a particular threshold then time $t$ is classified as a change point, $\hat{\tau}$.
 
-%https://media.nips.cc/nipsbooks/nipspapers/paper_files/nips28/reviews/1852.html
+In the online scenario, the time series under consideration can be thought of as a sliding window with data constantly coming in and out of the window of interest. The size of the window is an important consideration that is typically chosen based on the problem being solved. Too small a window and the sets of data may not yield a statistically significant result. Too large of a window and the problem leans more towards and off-line model, where high volumes must be stored and several change points may appear in a given window. If the amount of data is not a limitation then throttling the data may not be necessary.
 
-A modified, "no-prior-knowledge" exponentially-weighted moving average (NEWMA) is introduced in \cite{keriven2018newma}. Based on the standard exponentially weighted moving average, NEWMA computes two EWMA statistics of different weights. If the difference between the two EWMA statistics exceeds a predefined threshold then a changepoint is declared at that time step. The point of using two EWMA statistics is for one to have a larger forgetting factor. This makes any recent changes in distribution to weigh heavily in one statistic, resulting in a large difference between the two statistics. 
+\subsection{Performance Measures}
+Because of the unsupervised nature of detecting change points, it is difficult to evaluate the performance of change point detection models with real world data. Many papers detail asymptotic or non-asymptotic theoretical guarantees of their proposed change point methods.  These theoretical results are typically compared across different change point methods for benchmarking a new algorithm.
 
-Since a standard EWMA is a parametric method, the authors apply a kernel mapping function, $\Psi$, to the data prior to applying the exponential factors. This provides a memoryless, non-parametric, online changepoint detection method that does not need to constantly store all previously streamed data. Once the statistics are updated at each iteration, the raw data may be discarded. 
+Two main issues arise when detecting change points in a stream of data. The first is detecting a change point when there is no actual statistical change in the observed sequence. These are typically called false positives or \textit{false alarms} the in change point detection literature. The false alarm rate is defined by a metric known as the \textit{time to false alarm} (TTFA) rate. 
+\begin{equation}
+TTFA = E_{\infty}[T] = E_{\theta}[N]
+\end{equation}
+Where it is the expected number of observations that must be recorded before a change point is incorrectly detected. In other words, it is the average amount of time until a change is detected given a sequence of observations with no change. Therefore, a larger value of TTFA is preferable. From a hypothesis testing perspective, this is equivalent to rejecting $H_0$ in \hl{cite equation in problem statement} when it should not be rejected, i.e. type I error.
 
-While kernel mean embeddings could be used for approximating, $\Psi$, as is the case for standard implementations of MMD, this would require the storage of past examples of data. Because the authors aim to reduce run-time cost and storage cost, they use a Random Fourier Features (RFF) approach for the mapping $\Psi$. (Note RFF is sometimes referred to as \textit{random kitchen sinks}) There are several approaches available for optimizing the RFF approach that are well studied in the literature. The authors make use of the standard RFF implementation, the FastFood implementation introduced in \cite{le2014fastfood}, and Optical Processing Unit implementation from \cite{saade2016random}. 
+The second issue is not detecting a change point when one occurs. This could be caused by detecting a change point much too late for it to be of any use or simply missing it altogether. For quantifying this error, the worst case detection delay (WCD) metric measures how slow a model will detect a  change point in a worst case scenario. Conversely to TTFA, lower values of WCD are preferable.
+\begin{equation}
+WCD = sup esssup E_t[(T-t)^+ | F_{t-1}]
+\end{equation}
 
-Experiments are done with the three implementations of RFF and are compared to the MStats (Scan-B) algorithm using a Gaussian kernel. Experiments with synthetic datasets are run using streaming data that is generated from different Gaussian mixture models. They also use an audio dataset for testing on real data. The variants of NEWMA are very similar, if not better than MStats (Scan-B) in terms of missed detection percentage. In terms of the detection delay and false alarm trade-off, the NEWMA algorithm and its variants appear to be mildly better as well. The largest advantage of the NEWMA variants over the MStats (Scan-B) method is in the execution time. Because MStats (Scan-B)' s execution scales linearly with window size, while NEWMA's execution time does not depend on window size.
+From a hypothesis testing perspective, this is equivalent to not rejecting $H_0$ in \hl{cite equation in problem statement} when it should be rejected, i.e. type II error.
 
-Finally, in a recent, preprint paper \cite{flynn2019change}, a kernel CUSUM (KCUSUM) algorithm is proposed, where the classic CUSUM algorithm is adapted using the MMD statistic for on-line detection. The authors use a modified, unbiased MMD statistic that can be computed in linear time. This formulation of the MMD statistic was originally defined in section 6 of \cite{gretton2012kernel} as:
+Balancing the TTFA and WCD of an online detection algorithm is crucial to for an algorithm to be of any practical use. In \hl{1971 Lorden procedures to reacting...}, it was shown asymptotically that the CUSUM algorithm provides an optimal trade-off between TTFA and WCD and ,in \hl{moustakides optimal stopping times for detecting.. 1986}, it was proved optimal in the non-asymptotic case as well. Note, TTFA and WCD are also commonly referred to as ARL$_0$ and ARL$_1$ respectively where ARL stands for average run length. For clarity, we use the more explicit terms TTFA and WCD.
 
-$$\operatorname{MMD}_{l}^{2}[\mathcal{F}, X, Y] :=\frac{1}{m_{2}} \sum_{i=1}^{m_{2}} h\left(\left(x_{2 i-1}, y_{2 i-1}\right),\left(x_{2 i}, y_{2 i}\right)\right)$$
+When detecting changes of a distribution, a user may want to quantify the size of the change in the mean by
+$|\mathbb{E}[X_{\tau}]-\mathbb{E}[X_{\tau+1}]|$ or, similarly, the size of the change in the variance by $|\text{Var}[X_{\tau}]-\text{Var}[X_{\tau+1}]|$.
 
-Where,
+Average detection delay (ADD) is used to estimate the average time it takes for change point to be detected by a particular model. It is computed by comparing the time difference between a predicted change point and a and normalizing the total by the total number of change points. It is computed as:
+\begin{equation}
+\text{ADD} = \frac{\sum_i^{\#CP} |\hat{\tau_i} - \tau^*|}{\#CP}
+\end{equation}
+The closer the predicted change points are to the actual change points, the smaller the average detection delay. Therefore, the ADD can range from $(0, \inf)$. Because it relies on ground truth change points, it can only be used when experimenting on synthetic data where all the information is available.
 
-$$h\left((x_i, x_j), (y_i, y_j)\right):=k\left(x_{i}, x_{j}\right)+k\left(y_{i}, y_{j}\right)-k\left(x_{i}, y_{j}\right)-k\left(x_{j}, y_{i}\right)$$
+If labelled change points are available for a real world dataset or a synthetic dataset, then the ground truth change point vector, $\tau^*$, is known. Evaluating performance in this case is the same as evaluating a binary classifier from a supervised learning problem. For exmaple, the metrics from discussed in hypothesis testing, type-I error (false positives) and type-II error (false negatives), are commonly used for evaluating change point detection performance. The false positive rate (FPR) can be calculated by $FPR = FP / N$. Plotting the false positive rate and the true positive rate, gives the receiver operator characteristic curve. The area under this curve (AUC), is calculated and compared to random baseline performance of 0.5 that would be equivalent to classification by tossing a coin.
 
-The algorithm functions as follows, every two observations, the MMD$_l$ is calculated using newly observed data points and data points sampled from some \textit{reference} distribution that is known at the outset. This reference distribution can be thought of as the "in-control" distribution of the data-stream that new observations are compared to. The calculated MMD$_l$ acts as the update term to the cumulative sum statistic, hence the name KCUSUM. If this kernel cumulative sum statistic exceeds some predefined threshold, then a change-point is identified. 
+%For example the \textit{Hausdorff} metric can be used. It measures the furthest temporal distance between a predicted change point $\hat{\tau}$ and $\tau^*$. It is defined as:
 
-Besides its speed of computation, an additional benefit of MMD$_l$ is it is normally distributed under the null distribution unlike the quadratically-calculated MMD. This facilitates analysis of bounds and provides statistical guarantees for worst-case detection delays and time to false alarm rate. While this non-parametric approach can detect any change in the distribution of a sequence, it does struggle with more complicated distributional changes such as variance changes of a single dimension and changes beyond first and second-order moments.
+Other standard classifier metrics can also used for comparing $\hat{\tau}$ and $\tau^*$. This includes the  F1-Score that is based on a classifier's precision and recall:
+\begin{equation}
+F_1(\hat{\tau}, \tau^*) = 2 * \frac{\text{precision*recall}}{\text{precision + recall}}
+\end{equation}
 
-%In 2016, James et al. \cite{james2016leveraging} proposed using energy statistics to test the significance of a change point that is robust to anomalies. They point out that their work is the first to accurately detect change points with fast time to detection while not being affected by extreme outliers that are not change points. They compare their E-divisive with medians algorithm to the parametric PELT technique. 
+ F1-Score is defined as the harmonic mean of precision and recall. Precision is defined as the ratio of true positives (TP) to the
+number of true positives (TP) and false positives (FP) and recall is defined as the ratio the number of true positives to the
+number of true positives plus the number of false negatives. F1-Score is best when F1 = 1 (perfect precision and recall) and reaches its worst value at F1 = 0. Depending on the context, any other classifier evaluation tools such as the Receiver Operating Characteristics Curve and the Precision Recall Curve may be used as well.
 
-\section{Our Approach}
+\section{Classic Algorithms}
+Presented below are the fundamental approaches to online change point detection that have been very influential on modern approaches. Many modern algorithms are variants of the classic algorithms discussed below.
 
-This section describes our novel method for change-point detection.
+\subsection{Shewart Control Chart}
+Shewart control charts were originally designed to detect changes in the mean of a process where the values being observed are assumed to be Gaussian distributed. As the data arrives, the data is batched into samples of size $N$. The sample mean, $\bar{X}=\frac{1}{N} \sum_{i=1}^N X_i$, is the then calculated and compared it to a known, true mean $\mu^*$. If the absolute difference is greater than a threshold, then a change point is declared at the current batch. Therefore, the decision rule is defined as,
+\begin{equation}
+|\bar{X}-\mu^*| > \kappa \frac{\sigma}{\sqrt{N}}
+\end{equation}
+
+Where $\kappa$ is a constant that controls how sensitive the algorithm is. Typically, it is set to $\kappa=3$ as this coincides with the observations within $3$ standard deviations of the mean. Under the assumption that the data is distributed normally, $99.7$ of the observations are distributed in this region, therefore a change point is declared if it falls outside this region. The true mean is assumed to known and is defined as $\mu^* = \mathbb{E}[X_i]$. In applications, the true mean can also be replaced by some target specification that a process must adhere to. Similarly, it is assumed the standard deviation, $\sigma$, is known in advance but it can also be estimated.
+
+Tuning the hyper-parameters can drastically change the performance of the algorithm. Choosing a lower value for $\kappa$ makes the control chart detect change points more often, whereas a higher value results in less detections. The chosen sample size, $N$, is also critical and its effect on the performance of Shewart control charts was studied in \cite{haridy2017effect}.
+
+\subsection{CUSUM}
+Similar to the Shewart control chart, the CUSUM algorithm tracks a statistic over time relative to a predetermined threshold. CUSUM is best applied to a process that is already under control. It can be thought of accumulating the information of current and past samples. 
+
+The algorithm is defined by a statistic, $S_i$,  that is recursively updated after each sample, $X_i$, is observed, such that:
+\begin{equation}
+  \begin{cases}
+    S_0 = 0  & \text{(Initialization)} \\
+    S_i = \text{max}(0, S_{i-1} + Z_i) & \text{for i=1,2,...}
+  \end{cases}
+\end{equation}
+Where $Z_i=ln(\frac{f_{\theta_1}(X_i)}{f_{\theta_0}(X_i)})$ and the statistic $S_i$ is compared to a threshold $h$ that is predetermined by the user. If $Z_i \geq h$ then a change point is declared at time $i$ and the algorithm is either stopped or restarted. Given that the statistic only flags change points when greater than a threshold, this algorithm only detects positive changes in the distribution. In \cite{page1954continuous}, it is suggested to combine two CUSUM algorithms to detect positive and negative changes in a distributional parameter.
+
+As a parametric algorithm, it is assumed the distributions, $f_0$ and $f_1$, are known at the outset. In most applications, this is quite limiting and unrealistic. Therefore, in cases where parameters $\theta_0$ and $\theta_1$ are unknown, maximum likelihood estimates of the parameters are usually computed.
+
+The filtered-derivative extension of the CUSUM introduced in \cite{basseville1981edge} uses the change of the discrete derivative of a signal over time to detect a change point. 
+
+In \cite{lucas1982fast}, a fast initial response (FIR) CUSUM algorithm is proposed where the starting value of initial cumulative sums adapts over time. Instead of resetting $S_0$ to zero as shown above, it is reset to a non-zero value, typically based on the threshold chosen. This gives the algorithm a head-start in quickly detecting when a process is out of control and is especially useful for processes that don't start in control.
+
+Finally, since CUSUM is typically better at detecting small shifts in signals and the Shewart control chart is faster at detecting larger changes, the two can be combined. The combined Shewart-CUSUM algorithm leverages the strengths of both techniques for better overall performance. See \cite{lucas1982combined}, \cite{yashchin1985analysis}, and \cite{westgard1977combined} for more details. 
+
+\subsection{EWMA}
+First described in \cite{roberts1959control} as a "geometric average", the exponentially weighted moving average (EWMA) is a type of moving average that applies exponential weighting to samples. First introduced as a forecasting technique in the econometrics field for smoothing noisy functions, the EWMA can also be used for determining out of control processes as shown in \cite{hunter1986exponentially}. Rather than weight all observations uniformly like the standard CUSUM algorithm or a simple moving average, a decay factor (also called a  forgetting factor), $\lambda$, is used to control how much weight is distributed over the previous observations. As each new observation arrives, the EWMA statistic is recursively updated and compared to a threshold. If the EWMA statistic exceeds the threshold then the process is deemed out of control or, in other words, a change point is detected.
+
+The EWMA statistic is calculated as follows at each time step, $t$:
+$$S_t = \lambda X_t + (1-\lambda)S_{t-1} $$
+
+Where the decay factor,  $\lambda$, is set to a value between $0$ and $1$. As $\lambda$ approaches $1$, the EWMA control chart gives more and more weight to the most recent observations similar to a Shewhart control chart that gives weight to the last observation only. Conversely, as $\lambda$ approaches $0$, the weights are distributed further into the past giving the EWMA a longer memory similar to the CUSUM algorithm. Therefore, a EWMA control chart can be interpreted as a trade-off between a Shewhart control chart and a CUSUM control chart. 
+
+For detecting deviations away from a mean target value, control limits may be calculated in a similar manner to the Shewart control chart. In \cite{hunter1986exponentially}, control limits for the EWMA are chosen to be  $\pm 3 \cdot \sigma_{\text {Shewhart }} \sqrt{\frac{\lambda}{2-\lambda}}$. The standard deviation, $\sigma_{\text {Shewhart }}$, is calculated similarly to the Shewart control chart problem. %and its derivation is shown in the appendix of \hl{XX}.
+
+More generally, if a function, $g(x)$ is applied to the observations such that we monitor $\tau= \mathbb{E}[g(X_t)]$ over time. Then the EWMA statistic will be compared to the in-control $\tau^*$ at each iteration and is assumed to be known beforehand.  
+
+As with the other methods previously mentioned, the standard EWMA is a parametric method as it assumes the time series has some in-control average that is known prior to use. This makes is difficult to apply in situations where the data is non-numeric or where third or fourth moment changes in the distribution occur. It is however very fast due to its recursive structure and does not hold a lot of data in memory making it appealing for live data streams that rely on quick processing.

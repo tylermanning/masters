@@ -1,12 +1,35 @@
-\chapter{Conclusion}
-\section{Summary of the thesis}
-Add description of thesis, summarizing the key points from each chapter and what this thesis attempted to add to the literature.
+\chapter{Application to Market Liquidity}
 
-\section{Discussion and Future Work}
+In finance, \textit{market liquidity} describes how quickly a market participant may buy or sell an asset without causing significant fluctuations in the price. In liquid markets, there is minimal impact to the price by quickly buying (selling) it. In illiquid markets, a purchase (sale) of the asset will cause the price to rise (fall) resulting in adverse price selection if the buyer (seller) is making a large transaction. In both cases, market liquidity is in constant fluctuation. It is this fluctuation that is the focus of this thesis. 
+By detecting changes in market liquidity a market participant can identify periods of when trading may be more or less favourable. For example, an institutional investor wishing to unwind a large position over the course of several days may want to quickly detect rapid changes in a liquidity that could negatively impact their execution strategy.
 
+\section{Properties of the Limit Order Book}
 
-One focus of this thesis was using the MMD measure for two-sample testing and, by extension, for change-point detection. It would interesting to explore other statistical distances that could compare two distributions non-parametrically. It would be interesting to re-use the same approaches explored in this thesis, but with the MMD swapped for a different distance measure. 
+All modern financial markets are set-up as a double-sided auction between buyers (BID side) and the sellers (ASK side) called limit order books (LOBs). A market participant may post orders at specific prices on either side of the book.  
 
-Recently, interesting research has been made on re-purposing binary classifiers as two-sample tests. In \cite{hediger2019use}, random forests are compared to different implementations of MMD. The authors run many tests comparing the test power across the different two-sample tests and their random forest. The results are interesting because while the random forest classifier is not better in every situation, it is better on hard two-sample tests such as the blobs dataset. Therefore, it remains to be seen whether these classifier approaches to two-sample testing can be adapted to on-line change-point detection in an efficient manner.
+Every LOB has two configuration parameters: the tick size, $\pi >0$, which is the smallest possible price increment between orders at different prices and lot size, which dictates the smallest amount that can be traded. As mentioned in \hl{XXXX}, LOB is essentially a one-dimensional lattice where the dimension is price and every point on the price axis is a multiple \footnote{In most cases these multiples of $\pi$ are strictly positive but in particular markets, such as ED packs and bundles, there may be negative integers of $\pi$, i.e. a price axis with positive and negative prices.} of $\pi$.
 
-- lopez paper
+\section{Dataset Construction}
+
+While many types of markets operate using a basic order book, this thesis will be focused on futures markets found in the Chicago Mercantile Exchange (CME). The reasoning for this is two-fold. The first, unlike bond markets or currency pair markets, liquidity for many futures products is concentrated on a single exchange. This simplifies analysis of liquidity by not having to aggregate data across several exchanges into a synthetic ladder. The second advantage is, unlike equity markets where stocks and exchange traded funds (ETFs) are traded, there are no dark pools available for the futures markets under consideration in this thesis. Again this simplifies where the liquidity data for an instrument may appear.
+
+The futures that will be used in our dataset are based on a combination of selecting the most traded contracts on the CME and selecting futures that represent different asset classes. They are summarized in the following table:
+
+\begin{center}
+\captionof{table}{Summary of Futures Studied}
+\begin{tabular}{SSSSSS} \toprule
+    {Name} & {Asset Class} & {CME Symbol} & {Tick Size} & {Other}  \\ \midrule
+    {E-mini S\&P 500}  & {Equity} & {ES} & 0.25 & 1.402  \\
+    {10 Year T-Notes}  & {Fixed Income}  & {ZN} & 3.442  & 0.299  \\
+    {Crude Oil}  & {Commodity}  & {CL} & 3.442  & 0.299  \\
+    {Gold} & {Commodity}  & {GC} & 3.442  & 0.299  \\
+    {Euro FX}  & {Currency}  & {6E} & 3.442  & 0.299  \\ \bottomrule
+\label{futures}
+\end{tabular}
+\end{center}
+
+For each future contract in table \ref{futures}, the state of the order book is sampled every \hl{60 seconds} from 7 AM to 4 PM EST for a period of \hl{45} days. The characteristics of the order book that are sampled at every time step, $t_I$, are:
+1) Quantity, $q$, at the top $N$ levels of the book, $q_1 ... q_N$ 
+2) Spread, $s: [0, \mathbb{Z}^+]$, normalized by tick size, where spread of zero indicates there is no spread.
+
+While spread is not indicative of liquidity but rather an absence of liquidity, we believe it is an important feature to include because all other things being equal, a change in spread is an important change in liquidity distribution for market participants. 

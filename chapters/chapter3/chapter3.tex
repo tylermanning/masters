@@ -1,22 +1,141 @@
-\chapter{Experimental Results}
-\section{Datasets}
-A common difficulty in change-point detection is evaluating the performance of an algorithm with datasets that aren't overly simplistic and difficult enough to ascertain some real world use.
+\chapter{Kernel Change Point Detection}
 
-Unlike fields like image recognition where datasets like MNIST provide a common benchmark, there are no standard datasets that are widely used across the change-point detection literature for evaluating new methods. Most papers propose experiments that are relevant for the specific problem they are trying to solve  but lack examples or explanations of when their method would not be applicable.  Furthermore, because change-point evolved out of the statistics literature, many papers focus on theoretical results and provide minor experimental results if any.
+\section{Maximum Mean Discrepancy}
+\label{mmd}
+The maximum mean discrepancy (MMD) is a type of \textit{integral probability metric} that can be used to compare two probability distributions. It is based on the kernel mean embedding developed in \cite{smola2007hilbert}. The kernel mean embedding can be thought of applying the \textit{kernel trick} to probability measures and mapping them into a higher dimensional feature space. Rather than applying the kernel trick to individual data points and mapping them to an implicit feature space, the kernel mapping, $\phi$, (also called feature map) will be applied to a probability distribution in order to represent it in a reproducing kernel Hilbert space (RKHS), that is $\phi: \mathcal{X} \rightarrow \mathcal{H}$.
+
+Suppose $n$ samples from a set $X = \{x_1, x_2, ..., x_n\}$ and and $m$ samples from a different set $Y=\{y_1, y_2, ..., y_m\}$ are observed from a sample space $\mathcal{X}$. They are distributed as $X \sim  P$ and $Y \sim Q$ respectively. The kernel mean embeddings are represented by $\mu_P = \mathbb{E}_{X \sim P}[\phi(X)] $ and $\mu_Q =\mathbb{E}_{Y \sim Q}[\phi(Y)]$ for samples $X$ and $Y$ respectively. 
+
+It is not required but typically a \textit{characteristic} kernel function is chosen as it guarantees the mapping into the Hilbert space to be injective. As \cite{muandet2017kernel} points out, there is no loss if information in this case. See \cite{fukumizu2008kernel} for this proof. This implies that $||\mu_P - \mu_Q ||=0$ if and only if $P=Q$. This leads naturally to the definition of the MMD as:
+
+\begin{equation}
+\text{MMD}(P,Q)=|| \mathbb{E}_{X \sim P}[\phi(X)] -  \mathbb{E}_{Y \sim Q}[\phi(Y)]||_\mathcal{H}
+\end{equation}
+
+Where the MMD can be understood as the distance in $\mathcal{H}$ between the mean embeddings of the features. As long as a kernel mean embedding can be defined on the given data structure, the MMD can be used. This is why it can be applied to non-numeric data such as strings, graphs, and other data structures \cite{hofmann2008kernel}. One advantage of using the MMD for comparing distributions over other classic techniques like Kullback–Leibler (K-L) divergence is the density of the distributions do not have to be estimated as an interim step. 
+
+In \cite{gretton2012kernel}, the unbiased, estimate of the squared MMD is shown to be:
+
+\begin{equation}
+\begin{split}
+\widehat{\mathbf{M M D}}_{u}^{2}(\mathcal{F}, X, Y)=\frac{1}{m(m-1)} \sum_{i=1}^m \sum_{ j=1}^{m} k\left(x_{i}, x_{j}\right)-\frac{2}{m n} \sum_{i=1}^m \sum_{ j=1}^{n} k\left(x_{i}, y_{j}\right)+ \\
+\frac{1}{n(n-1)} \sum_{i=1}^n \sum_{j=1}^{n} k\left(y_{i}, y_{j}\right)
+\end{split}
+\end{equation}
+
+
+%Which by law of large numbers converges to the theoretical values at a rate of XX. 
+%On its own, the MMD is not a metric but it can be one if the chosen kernel,$k$, is a \textit{characteristic kernel}. 
+
+Common kernel functions used in practice are the radial basis function kernel, $k(x, y)= e^{-\frac{1}{2\sigma^2}||x-y||^2}$ and the laplace kernel, $k(x, y)= e^{-\frac{1}{\sigma^2}||x-y||}$, where $\sigma > 0$. In \cite{gretton2005kernel}, the authors recommend selecting the bandwidth kernel, $\sigma$, based on the \textit{median heuristic}, which results in $\sigma^2=\text{median}\{||x_i-x_j||:i,j = 1,...,n\}$. This heuristic is a good starting point, however, it has been shown to be sub-optimal in high-dimensional and small-sample cases as shown in \cite{muandet2014kernel} and \cite{ramdas2015decreasing}. Choosing the proper kernel is often done on a per case basis by maximizing test power, thereby reducing the chance of Type-II error. Overall kernel selection is a difficult problem that is still actively researched.
+
+Originally in \cite{gretton2012kernel}, it was thought the MMD does not suffer from the curse of dimensionaity when used to compare distributions in higher dimensions. However, it was shown in \hl{https://arxiv.org/pdf/1406.2083.pdf} that indeed the MMD does struggle in higher dimensions like many other metrics do.
+
+\hl{REWORD: We call the function that achieves the supremum, the witness function because it is the function that witnesses the difference in the two distributions. This means that we can interpret the witness function as showing where the estimated densities of
+p and q are most different.}
+
+The witness function 
+\begin{equation}
+f(x)=\mathbb{E}_{x^{\prime} \sim p}\left[k\left(x, x^{\prime}\right)\right]-\mathbb{E}_{x^{\prime} \sim q}\left[k\left(x, x^{\prime}\right)\right]
+\end{equation}
+
+which can also be estimated from finite samples of data by:
+\begin{equation}
+\hat{f}(x)=\frac{1}{m} \sum_{i=1}^{m} k\left(x, x_{i}\right)-\frac{1}{n} \sum_{i=1}^{n} k\left(x, y_{i}\right)
+\end{equation}
+Thus, as [need citation] points at, the witness function tracks where the densities of $X$ and $Y$ are most different. 
+Kernel selection is important because it decides the kind of witness functions that can be learned. For most applications it is simply set to the RBF kernel but ideally it should be selected based on maximizing test power.
+
+The two-sample kernel test statistic is defined in \cite{gretton2012kernel} and uses the MMD as a distance measure for comparing two probability distributions. Where the null hypothesis is that both samples stem from the same distribution,  (i.e. $P=Q$) and the alternative hypothesis is that they are not drawn from the same distribution such that $P \neq Q$.
+
+As mentioned in \hl{hypothesis testing section}, every two-sample test follows a similar procedure, therefore using the MMD as a measure of distance, the steps to perform a two-sample test  are as follows:
+
+1.Distance MMD2k(P,Q):
+
+Choose a kernel $k$
+For characteristic $k$, k(P,Q)=0 iff P=Q
+2.Estimate the distribution distance from data: MMD(X,Y)
+3.Choose a rejection threshold calpha:
+
+Under H0, mMMD converges to distribution depending on data, k
+
+\section{Related Work}
+
+One of the first papers to use the term kernel change point detection was in \cite{desobry2005online}. The authors present an online kernel change point detection model based on single class support vector machines ($\nu$-SVMs). They train a single class support vector on a past set, $\mathbf{x}_{t,1}={x_{t-m_1},...,x_{t-1}}$ of size $m_1$ and train another single class support vector on a future set $\mathbf{x}_{t,2}={x_t,...,x_{t+m_2-1}}$ of size $m_2$. A ratio is then computed between the two sets that acts as the dissimilarity measure in Hilbert space. If the sets are sufficiently dissimilar over some predetermined threshold,then a change point is assigned to the time step that spits the two sets of data. The authors argue that a dissimilarity measure between kernel projection of points in a Hilbert space should estimate the \textit{density supports} rather than estimate the probability distributions of each set of points. While this approach inspired a lot of interesting research that will be discussed below, modern, practical approaches have used different approaches.
+
+In 2007, Harchoui and Cappe \cite{harchaoui2007retrospective} approached the off-line change point problem with a fixed number of change points using kernel change point detection. This was further extended to an unknown number of change points in 2012 by Arlot et al. \cite{arlot2012kernel}. \hl{Finally, Garreau and Arlot extended this in line of research kernel change points in the off-line setting of detecting change points.} Fundamentally, their method is the kernel version of the following least squares optimization problem:
+
+\begin{equation}
+J(\tau, \mathbf{y}) = \frac{1}{n} \sum_{k=1}^K(\tau) \sum (Y_i - \hat(Y_k)^2 + \beta \text{pen}(\tau)
+\end{equation}
+
+
+The benefits of this off-line kernel change point detection is that it operates on any kind of data for which a kernel can properly reproduce a Hilbert space. For example, it can be applied to image data, histogram data, as well as $d-$dimensional vectors in $\mathbb{R}^d$. Garreau shows their KCP procedure outputs an off-line segmentation near optimal with high probability. Lastly, the authors recommend choosing the kernel based on best possible signal to noise ratio that the distribution gives based on $ \Delta^2 / M^2$ . Therefore, some prior knowledge or training set is necessary for calibrating the kernel. 
+
+In  \cite{li2015m}, the authors make use of the B-test introduced in \cite{zaremba2013b} and develop an offline and online change point detection algorithm called the MStats algorithm (the authors also refer to this algorithm as the Scan-B algorithm in a follow-up paper). At each time-step, the online model samples new data from a window of size $B_0$ and does a B-test with $N$ past samples that are kept as reference samples. 
+
+$$Z_{B_{0}, t}:=\frac{1}{N} \sum_{i=1}^{N} \operatorname{MMD}_{u}^{2}\left(X_{i}^{\left(B_{0}, t\right)}, Y^{\left(B_{0}, t\right)}\right)$$
+
+The resulting test statistic is then normalized by $Z_{B_{0}, t}/\sqrt{Var[Z_{B_0}]}$ where the authors provide a theoretical calculation of $\text{Var}[Z_B]$. If the normalized test statistic exceeds some predefined threshold then a change point is declared. The B-test is memoryless in the sense that the statistic is calculated each time and only the value of the last calculation has any weight. This is similar to a control chart that calculates a z-score at each iteration. Adjusting the size of the window, $B_0$, results in the usual trade-off of performance in online change point detection. A smaller block size will have a smaller computational cost and a smaller detection delay but will result in higher type II error and, as a result, worse test power.
+
+From here, theoretical bounds are developed for the average run length and expected detection delay. Experiments are done on real-data sets including a speech dataset  and the Human Activity Sensing Consortium (HASC) dataset where the performance was better than the relative density-ratio (RDR) algorithm described in \cite{liu2013change}.
+
+More recently in \cite{chang2019kernel}, a  kernel change point detection method is proposed that uses deep generative models to augment the test power of the kernel two sample test statistic. They point out MMD's lack of test power when using limited samples from the new distribution, $Q$, which may easily leading to over-fitting with kernels. Thus they use a generative adversarial neural network (GAN), trained on historical samples of $X \sim  P$  with noise injected into $X$. This surrogate distribution is then used in conjunction with possible change points to improve the test power of a modified MMD measure that makes use of compositional kernels.
+
+The method is compared to other prominent change point methods for off-line  change detection such as the aforementioned MStats-KCPD, LSTNet, and Gaussian process change point models. All comparisons are done on synthetic data with piece-wise i.i.d. data. All methods are benchmarked using the AUC metric for classification performance and it is shown the KL-CPD method is competitive or better than the state of the art methods.  Furthermore, the AUC performance is maintained as the dimensionality of the data is increased, making their kernel learning framework very interesting for future off-line change point detection. It remains to be seen if this framework can be adopted in an online context where time to detection is a key constraint on practicality.
+
+In the online setting, several methods use kernel embeddings with a two-sample hypothesis test. This is done in a similar vein to the classic CUSUM and Shewart control charts. They all make use of the maximum mean discrepancy (MMD) test statistic for a two-sample kernel hypothesis test. 
+
+%https://media.nips.cc/nipsbooks/nipspapers/paper_files/nips28/reviews/1852.html
+
+A modified, "no-prior-knowledge" exponentially-weighted moving average (NEWMA) is introduced in \cite{keriven2018newma}. Based on the standard exponentially weighted moving average, NEWMA computes two EWMA statistics of different weights. If the difference between the two EWMA statistics exceeds a predefined threshold then a changepoint is declared at that time step. The point of using two EWMA statistics is for one to have a larger forgetting factor. Any recent changes in a distribution will weigh heavily on one statistic, resulting in a large difference between the two statistics. If this this statistical difference exceeds a predefined threshold, then a change point is declared at this point in time.
+
+Since a standard EWMA is a parametric method, the authors apply a kernel mapping function, $\Psi$, to the data prior to applying the exponential weights. This provides a memoryless, non-parametric, online changepoint detection method that does not need to constantly store all previously streamed data. Once the statistics are updated at each iteration, the raw data may be discarded. This characteristic makes it especially useful in applications where security is a concern.
+
+While kernel mean embeddings could be used for approximating, $\Psi$, as is the case for standard implementations of MMD, this would require the storage of past examples of data. Because the authors aim to reduce run-time cost and storage cost, they use a Random Fourier Features (RFF) approach for estimating $\Psi$ (Note RFF is sometimes referred to as \textit{random kitchen sinks}). There are several approaches available for optimizing the RFF approach that are well studied in the literature, namely the standard RFF implementation, the FastFood implementation introduced in \cite{le2014fastfood}, and Optical Processing Unit implementation from \cite{saade2016random}. 
+
+The three implementations of RFF and are compared to the MStats (Scan-B) algorithm by running empirical experiments on synthetic and real datasets. The synthetic datasets are run using streaming data that is generated from different Gaussian mixture models. They use an audio dataset for testing on real data. The variants of NEWMA are similar, if not better than MStats (Scan-B) in terms of missed detection percentage. In terms of average detection delay and false alarm trade-off, the NEWMA algorithm and its variants appear to be mildly better as well. The largest advantage of the NEWMA variants over the MStats (Scan-B) method is in the execution time. MStats (Scan-B)'s execution scales linearly with window size, while NEWMA's execution time does not depend on window size.
+
+Finally, in a recent, preprint paper \cite{flynn2019change}, a kernel CUSUM (KCUSUM) algorithm is proposed, where the classic CUSUM algorithm is adapted using the MMD statistic for online detection. The authors use a modified, unbiased MMD statistic that can be computed in linear time. This formulation of the MMD statistic was originally defined in section 6 of \cite{gretton2012kernel} as:
+
+$$\operatorname{MMD}_{l}^{2}[\mathcal{F}, X, Y] :=\frac{1}{m_{2}} \sum_{i=1}^{m_{2}} h\left(\left(x_{2 i-1}, y_{2 i-1}\right),\left(x_{2 i}, y_{2 i}\right)\right)$$
+
+Where,
+
+$$h\left((x_i, x_j), (y_i, y_j)\right):=k\left(x_{i}, x_{j}\right)+k\left(y_{i}, y_{j}\right)-k\left(x_{i}, y_{j}\right)-k\left(x_{j}, y_{i}\right)$$
+
+The algorithm functions as follows, every two observations, the MMD$_l$ is calculated using newly observed data points and data points sampled from some \textit{reference} distribution that is known at the outset. This reference distribution can be thought of as the "in-control" distribution of the data-stream that new observations are compared to. The calculated MMD$_l$ acts as the update term to the cumulative sum statistic, hence the name KCUSUM. If this kernel cumulative sum statistic exceeds some predefined threshold, then a change point is identified. 
+
+Besides its speed of computation, an additional benefit of MMD$_l$ is it is normally distributed under the null distribution unlike the quadratically-calculated MMD$_u$. This facilitates analysis of bounds and provides statistical guarantees for worst-case detection delays and time to false alarm rate. While this non-parametric approach can detect any change in the distribution of a sequence, it does struggle with more complicated distributional changes such as variance changes of a single dimension and changes beyond first and second-order moments.
+
+%In 2016, James et al. \cite{james2016leveraging} proposed using energy statistics to test the significance of a change point that is robust to anomalies. They point out that their work is the first to accurately detect change points with fast time to detection while not being affected by extreme outliers that are not change points. They compare their E-divisive with medians algorithm to the parametric PELT technique. 
+
+\section{Our Approach}
+
+This section describes our novel method for change point detection.
+
+
+
+\section{Datasets}
+A common difficulty in change point detection is evaluating the performance of an algorithm with datasets that aren't overly simplistic and difficult enough to ascertain some real world use.
+
+Unlike fields like image recognition where datasets like MNIST provide a common benchmark, there are no standard datasets that are widely used across the change point detection literature for evaluating new methods. Most papers propose experiments that are relevant for the specific problem they are trying to solve  but lack examples or explanations of when their method would not be applicable.  Furthermore, because change point evolved out of the statistics literature, many papers focus on theoretical results and provide minor experimental results if any.
 
 Given the empirical focus of this thesis, we attempt to put together the most comprehensive, controlled experiments using both synthetic and real-world datasets.
 \subsection{Synthetic Datasets}
-To the best of our knowledge, no change-point detection paper covers as many variations as presented in this thesis. While synthetic datasets are idealistic in their formulation, they provide a good starting point for comparing different methods because many variables can be controlled for. Often in the real world, the exact location of change-points is not known. Therefore, it is important for the evaluation of a change-point detection algorithm that it performs competitively on synthetic data.
+To the best of our knowledge, no change point detection paper covers as many variations as presented in this thesis. While synthetic datasets are idealistic in their formulation, they provide a good starting point for comparing different methods because many variables can be controlled for. Often in the real world, the exact location of change points is not known. Therefore, it is important for the evaluation of a change point detection algorithm that it performs competitively on synthetic data.
 
 Inspired by recent papers \cite{chang2019kernel} and \cite{flynn2019change} that attempt to bridge the gap between the statistics and machine-learning literature, the following synthetic datasets are created: change in mean, scaling variance, alternating between two Gaussian mixtures, and alternating between random distributions. It is truly hard to properly generalize all the possible situations a non-parametric algorithm may be used in, but the synthetic cases presented in this thesis are common across domains and cover a range of applications.
 
-For a change in mean, a change-point is inserted in the time series at some random time where the mean is shifted either positively or negatively. There are two variants to this scenario. In the first, the mean change is in all dimensions simultaneously. In the second variation, the mean change is in only one dimension making it harder to detect. 
+For a change in mean, a change point is inserted in the time series at some random time where the mean is shifted either positively or negatively. There are two variants to this scenario. In the first, the mean change is in all dimensions simultaneously. In the second variation, the mean change is in only one dimension making it harder to detect. 
 
 For each experiment above, a Monte-Carlo approach is used to estimate time to false alarm, detection delay, and test power. 
 
 \subsection{Real World Datasets}
 In addition to synthetic datasets, several real datasets that are publicly available are also used. 
 
+\begin{center}
+\captionof{table}{Datasets Summary}
 \begin{tabular}{SSSSSS} \toprule
     {Dataset} & {Type} & {No. of Dimensions} & {Length} & {No. of Changepoints}  \\ \midrule
     {Mean (all dimensions)}  & {Synthetic} & +8.872 & 16.128 & 1.402  \\
@@ -28,7 +147,7 @@ In addition to synthetic datasets, several real datasets that are publicly avail
     7  & {Real}  & -0.363 & 1.826  & 0.159  \\
     8 & {Real}  & -0.597 & 0.598  & 0.052  \\ \bottomrule
 \end{tabular}
-\captionof{table}{Datasets Summary}
+\end{center}
 
 
 
