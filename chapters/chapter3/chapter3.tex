@@ -2,11 +2,13 @@
 
 \section{Maximum Mean Discrepancy}
 \label{mmd}
-The maximum mean discrepancy (MMD) is a type of \textit{integral probability metric} that can be used to compare two probability distributions. It is based on the kernel mean embedding developed in \cite{smola2007hilbert}. The kernel mean embedding can be thought of applying the \textit{kernel trick} to probability measures and mapping them into a higher dimensional feature space. Rather than applying the kernel trick to individual data points and mapping them to an implicit feature space, the kernel mapping, $\phi$, (also called feature map) will be applied to a probability distribution in order to represent it in a reproducing kernel Hilbert space (RKHS), that is $\phi: \mathcal{X} \rightarrow \mathcal{H}$.
+The maximum mean discrepancy (MMD) is a type of \textit{integral probability metric} that can be used to compare two probability distributions. It makes use of the kernel mean embedding developed in \cite{smola2007hilbert}. The kernel mean embedding can be thought of applying the \textit{kernel trick} to probability measures and mapping them into a higher dimensional feature space. Rather than applying the kernel trick to individual data points and mapping them to an implicit feature space, the kernel mapping, $\phi$, (also called feature map) will be applied to a probability distribution in order to represent it in a reproducing kernel Hilbert space (RKHS), that is $\phi: \mathcal{X} \rightarrow \mathcal{H}$.
 
-Suppose $n$ samples from a set $X = \{x_1, x_2, ..., x_n\}$ and and $m$ samples from a different set $Y=\{y_1, y_2, ..., y_m\}$ are observed from a sample space $\mathcal{X}$. They are distributed as $X \sim  P$ and $Y \sim Q$ respectively. The kernel mean embeddings are represented by $\mu_P = \mathbb{E}_{X \sim P}[\phi(X)] $ and $\mu_Q =\mathbb{E}_{Y \sim Q}[\phi(Y)]$ for samples $X$ and $Y$ respectively. 
+Let $k: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ be a kernel function 
 
-It is not required but typically a \textit{characteristic} kernel function is chosen as it guarantees the mapping into the Hilbert space to be injective. As \cite{muandet2017kernel} points out, there is no loss if information in this case. See \cite{fukumizu2008kernel} for this proof. This implies that $||\mu_P - \mu_Q ||=0$ if and only if $P=Q$. This leads naturally to the definition of the MMD as:
+Suppose $n$ samples from a set $X = \{x_1, x_2, ..., x_n\}$ and $m$ samples from a different set $Y=\{y_1, y_2, ..., y_m\}$ are observed from a sample space $\mathcal{X}$. Assume both are distributed as $X \sim  P$ and $Y \sim Q$ respectively. The kernel mean embeddings are denoted by $\mu_P = \mathbb{E}_{X \sim P}[\phi(X)] $ and $\mu_Q =\mathbb{E}_{Y \sim Q}[\phi(Y)]$ for samples $X$ and $Y$ respectively, where $\mu_P, \mu_Q \in \mathcal{H}$.
+
+If the kernel mapping into the Hilbert space is injective then $k$ is called  \textit{characteristic}. As \cite{muandet2017kernel} points out, there is no loss if information in this case. See \cite{fukumizu2008kernel} for this proof. This implies that $||\mu_P - \mu_Q ||=0$ if and only if $P=Q$. This leads naturally to the definition of the MMD as:
 
 \begin{equation}
 \text{MMD}(P,Q)=|| \mathbb{E}_{X \sim P}[\phi(X)] -  \mathbb{E}_{Y \sim Q}[\phi(Y)]||_\mathcal{H}
@@ -14,23 +16,48 @@ It is not required but typically a \textit{characteristic} kernel function is ch
 
 Where the MMD can be understood as the distance in $\mathcal{H}$ between the mean embeddings of the features. As long as a kernel mean embedding can be defined on the given data structure, the MMD can be used. This is why it can be applied to non-numeric data such as strings, graphs, and other data structures \cite{hofmann2008kernel}. One advantage of using the MMD for comparing distributions over other classic techniques like Kullback–Leibler (K-L) divergence is the density of the distributions do not have to be estimated as an interim step. 
 
+
+Typically, the actual distributions $P$ and $Q$ are unknown, making $\mu_P$ and $\mu_Q$ also unknown. Therefore, for applications, empirical estimates using the sampled data $X$ and $Y$ must be used instead. As shown in \cite{muandet2017kernel}, the empirical estimate of the kernel mean embeddings, denoted by $\hat{\mu}_P$ and  $\hat{\mu}_Q$ respectively, is
+
+\noindent
+\begin{tabularx}{\linewidth}{@{}XX@{}}
+\begin{equation}
+  \hat{\mu}_P := \frac{1}{n} \sum_{i=1}^n k(x_i, \cdot)
+\end{equation}
+&
+\begin{equation}
+    \hat{\mu}_Q := \frac{1}{n} \sum_{i=1}^n k(x_i, \cdot).
+\end{equation}
+\end{tabularx}
+As shown in \cite{sriperumbudur2012empirical}, $\hat{\mu}_P$ is an unbiased estimate of $\mu_P$  and by law of large numbers, $\hat{\mu}_P$ converges to as $n \to \infty$. 
+
 In \cite{gretton2012kernel}, the unbiased, estimate of the squared MMD is shown to be:
 
 \begin{equation}
 \begin{split}
-\widehat{\mathbf{M M D}}_{u}^{2}(\mathcal{F}, X, Y)=\frac{1}{m(m-1)} \sum_{i=1}^m \sum_{ j=1}^{m} k\left(x_{i}, x_{j}\right)-\frac{2}{m n} \sum_{i=1}^m \sum_{ j=1}^{n} k\left(x_{i}, y_{j}\right)+ \\
+\widehat{\mathbf{M M D}}_{u}^{2}(X, Y)=\frac{1}{m(m-1)} \sum_{i=1}^m \sum_{ j=1}^{m} k\left(x_{i}, x_{j}\right)-\frac{2}{m n} \sum_{i=1}^m \sum_{ j=1}^{n} k\left(x_{i}, y_{j}\right)+ \\
 \frac{1}{n(n-1)} \sum_{i=1}^n \sum_{j=1}^{n} k\left(y_{i}, y_{j}\right)
 \end{split}
 \end{equation}
 
+and the biased estimation of the squared MMD is
+\begin{equation}
+\widehat{\mathbf{M M D}}_{b}^{2}(X, Y)= \frac{1}{n^{2}} \sum_{i=1}^{n} \sum_{j=1}^{n} k\left(x_{i}, x_{j}\right)+\frac{1}{m^{2}} \sum_{i=1}^{m} \sum_{j=1}^{m} k\left(y_{i}, y_{j}\right)-\frac{2}{n m} \sum_{i=1}^{n} \sum_{j=1}^{m} k\left(x_{i}, y_{j}\right).
+\end{equation}
 
 %Which by law of large numbers converges to the theoretical values at a rate of XX. 
 %On its own, the MMD is not a metric but it can be one if the chosen kernel,$k$, is a \textit{characteristic kernel}. 
 
-Common kernel functions used in practice are the radial basis function kernel, $k(x, y)= e^{-\frac{1}{2\sigma^2}||x-y||^2}$ and the laplace kernel, $k(x, y)= e^{-\frac{1}{\sigma^2}||x-y||}$, where $\sigma > 0$. In \cite{gretton2005kernel}, the authors recommend selecting the bandwidth kernel, $\sigma$, based on the \textit{median heuristic}, which results in $\sigma^2=\text{median}\{||x_i-x_j||:i,j = 1,...,n\}$. This heuristic is a good starting point, however, it has been shown to be sub-optimal in high-dimensional and small-sample cases as shown in \cite{muandet2014kernel} and \cite{ramdas2015decreasing}. Choosing the proper kernel is often done on a per case basis by maximizing test power, thereby reducing the chance of Type-II error. Overall kernel selection is a difficult problem that is still actively researched.
+Common characteristic kernel functions used in practice are the radial basis function kernel, $k(x, y)= e^{-\frac{1}{2\sigma^2}||x-y||^2}$ and the laplace kernel, $k(x, y)= e^{-\frac{1}{\sigma^2}||x-y||}$, where $\sigma > 0$. In \cite{gretton2005kernel}, the authors recommend selecting the bandwidth kernel, $\sigma$, based on the \textit{median heuristic}, which computes $\sigma$ according to, 
+\begin{equation}
+\sigma^2=\text{median}\{||x_i-x_j||:i,j = 1,...,n \}.
+\end{equation}
 
-Originally in \cite{gretton2012kernel}, it was thought the MMD does not suffer from the curse of dimensionaity when used to compare distributions in higher dimensions. However, it was shown in \hl{https://arxiv.org/pdf/1406.2083.pdf} that indeed the MMD does struggle in higher dimensions like many other metrics do.
+This heuristic is a good starting point, however, it has been shown to be sub-optimal in high-dimensional and small-sample cases as shown in \cite{muandet2014kernel} and \cite{ramdas2015decreasing}. Choosing the proper kernel is often done on a per case basis by maximizing test power. Overall kernel selection is a difficult problem that is still actively researched.
 
+Originally in \cite{gretton2012kernel}, it was thought the MMD does not suffer from the curse of dimensionality when used to compare distributions in higher dimensions. However, it was shown in \cite{ramdas2015decreasing} that indeed the MMD does struggle in higher dimensions.
+
+\iffalse
 \hl{REWORD: We call the function that achieves the supremum, the witness function because it is the function that witnesses the difference in the two distributions. This means that we can interpret the witness function as showing where the estimated densities of
 p and q are most different.}
 
@@ -45,15 +72,13 @@ which can also be estimated from finite samples of data by:
 \end{equation}
 Thus, as [need citation] points at, the witness function tracks where the densities of $X$ and $Y$ are most different. 
 Kernel selection is important because it decides the kind of witness functions that can be learned. For most applications it is simply set to the RBF kernel but ideally it should be selected based on maximizing test power.
-
+\fi 
+ 
 The two-sample kernel test statistic is defined in \cite{gretton2012kernel} and uses the MMD as a distance measure for comparing two probability distributions. Where the null hypothesis is that both samples stem from the same distribution,  (i.e. $P=Q$) and the alternative hypothesis is that they are not drawn from the same distribution such that $P \neq Q$.
 
 As mentioned in \hl{hypothesis testing section}, every two-sample test follows a similar procedure, therefore using the MMD as a measure of distance, the steps to perform a two-sample test  are as follows:
 
 1.Distance MMD2k(P,Q):
-
-Choose a kernel $k$
-For characteristic $k$, k(P,Q)=0 iff P=Q
 2.Estimate the distribution distance from data: MMD(X,Y)
 3.Choose a rejection threshold calpha:
 
@@ -61,7 +86,7 @@ Under H0, mMMD converges to distribution depending on data, k
 
 \section{Related Work}
 
-One of the first papers to use the term kernel change point detection was in \cite{desobry2005online}. The authors present an online kernel change point detection model based on single class support vector machines ($\nu$-SVMs). They train a single class support vector on a past set, $\mathbf{x}_{t,1}={x_{t-m_1},...,x_{t-1}}$ of size $m_1$ and train another single class support vector on a future set $\mathbf{x}_{t,2}={x_t,...,x_{t+m_2-1}}$ of size $m_2$. A ratio is then computed between the two sets that acts as the dissimilarity measure in Hilbert space. If the sets are sufficiently dissimilar over some predetermined threshold,then a change point is assigned to the time step that spits the two sets of data. The authors argue that a dissimilarity measure between kernel projection of points in a Hilbert space should estimate the \textit{density supports} rather than estimate the probability distributions of each set of points. While this approach inspired a lot of interesting research that will be discussed below, modern, practical approaches have used different approaches.
+One of the first papers to use the term \textit{kernel change point detection} was in \cite{desobry2005online}. The authors present an online kernel change point detection model based on single class support vector machines ($\nu$-SVMs). They train a single class support vector on a past set, $\mathbf{x}_{t,1}={x_{t-m_1},...,x_{t-1}}$ of size $m_1$ and train another single class support vector on a future set $\mathbf{x}_{t,2}={x_t,...,x_{t+m_2-1}}$ of size $m_2$. A ratio is then computed between the two sets that acts as the dissimilarity measure in Hilbert space. If the sets are sufficiently dissimilar over some predetermined threshold,then a change point is assigned to the time step that spits the two sets of data. The authors argue that a dissimilarity measure between kernel projection of points in a Hilbert space should estimate the \textit{density supports} rather than estimate the probability distributions of each set of points. While this approach inspired a lot of interesting research that will be discussed below, modern, practical approaches have used different approaches.
 
 In 2007, Harchoui and Cappe \cite{harchaoui2007retrospective} approached the off-line change point problem with a fixed number of change points using kernel change point detection. This was further extended to an unknown number of change points in 2012 by Arlot et al. \cite{arlot2012kernel}. \hl{Finally, Garreau and Arlot extended this in line of research kernel change points in the off-line setting of detecting change points.} Fundamentally, their method is the kernel version of the following least squares optimization problem:
 
@@ -115,15 +140,12 @@ Besides its speed of computation, an additional benefit of MMD$_l$ is it is norm
 This section describes our novel method for change point detection.
 
 
-
-\section{Datasets}
+\section{Synthetic Datasets}
 A common difficulty in change point detection is evaluating the performance of an algorithm with datasets that aren't overly simplistic and difficult enough to ascertain some real world use.
 
 Unlike fields like image recognition where datasets like MNIST provide a common benchmark, there are no standard datasets that are widely used across the change point detection literature for evaluating new methods. Most papers propose experiments that are relevant for the specific problem they are trying to solve  but lack examples or explanations of when their method would not be applicable.  Furthermore, because change point evolved out of the statistics literature, many papers focus on theoretical results and provide minor experimental results if any.
 
-Given the empirical focus of this thesis, we attempt to put together the most comprehensive, controlled experiments using both synthetic and real-world datasets.
-\subsection{Synthetic Datasets}
-To the best of our knowledge, no change point detection paper covers as many variations as presented in this thesis. While synthetic datasets are idealistic in their formulation, they provide a good starting point for comparing different methods because many variables can be controlled for. Often in the real world, the exact location of change points is not known. Therefore, it is important for the evaluation of a change point detection algorithm that it performs competitively on synthetic data.
+Given the empirical focus of this thesis, we attempt to put together the most comprehensive experiments using synthetic. To the best of our knowledge, no change point detection paper covers as many variations as presented in this thesis. While synthetic datasets are idealistic in their formulation, they provide a good starting point for comparing different methods because many variables can be controlled for. Often in the real world, the exact location of change points is not known. Therefore, it is important for the evaluation of a change point detection algorithm that it performs competitively on synthetic data.
 
 Inspired by recent papers \cite{chang2019kernel} and \cite{flynn2019change} that attempt to bridge the gap between the statistics and machine-learning literature, the following synthetic datasets are created: change in mean, scaling variance, alternating between two Gaussian mixtures, and alternating between random distributions. It is truly hard to properly generalize all the possible situations a non-parametric algorithm may be used in, but the synthetic cases presented in this thesis are common across domains and cover a range of applications.
 
@@ -131,21 +153,17 @@ For a change in mean, a change point is inserted in the time series at some rand
 
 For each experiment above, a Monte-Carlo approach is used to estimate time to false alarm, detection delay, and test power. 
 
-\subsection{Real World Datasets}
-In addition to synthetic datasets, several real datasets that are publicly available are also used. 
-
 \begin{center}
-\captionof{table}{Datasets Summary}
+\captionof{table}{Synthetic Datasets Summary}
 \begin{tabular}{SSSSSS} \toprule
-    {Dataset} & {Type} & {No. of Dimensions} & {Length} & {No. of Changepoints}  \\ \midrule
-    {Mean (all dimensions)}  & {Synthetic} & +8.872 & 16.128 & 1.402  \\
-    {Mean (single dimension)}  & {Synthetic}  & -2.509 & 3.442  & 0.299  \\
-    3  & {Synthetic}  & -2.509 & 3.442  & 0.299  \\
-    4 & {Synthetic}  & -2.509 & 3.442  & 0.299  \\
-    5  & {Synthetic}  & -2.509 & 3.442  & 0.299  \\
-    6  & {Synthetic}  & -2.509 & 3.442  & 0.299  \\
-    7  & {Real}  & -0.363 & 1.826  & 0.159  \\
-    8 & {Real}  & -0.597 & 0.598  & 0.052  \\ \bottomrule
+    {Type of Change} & {No. of Dimensions} & {Length} & {No. of Changepoints}  \\ \midrule
+    {Mean (all dimensions)}  & 20 & 5000 & 50  \\
+    {Mean (single dimension)}  & 20 & 5000 & 50  \\
+    {Variance}  & 20 & 5000 & 50  \\
+    {Frequency}  & 1 & 5000  & 50  \\
+    {Correlation} & 2 & 5000  & 50  \\
+    {Blobs}  & 10 & 10 000  & 50  \\
+    {GMMs}  & 50 & 10 000  & 50  \\ \bottomrule
 \end{tabular}
 \end{center}
 

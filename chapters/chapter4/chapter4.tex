@@ -1,41 +1,50 @@
 \chapter{Application to Market Liquidity}
 
 In finance, \textit{market liquidity} describes how quickly a market participant may buy or sell an asset without causing significant fluctuations in the price. In liquid markets, there is minimal impact to the price by quickly buying (selling) it. In illiquid markets, a purchase (sale) of the asset will cause the price to rise (fall) resulting in adverse price selection if the buyer (seller) is making a large transaction. In both cases, market liquidity is in constant fluctuation. It is this fluctuation that is the focus of this thesis. 
-By detecting changes in market liquidity a market participant can identify periods of when trading may be more or less favourable. For example, an institutional investor wishing to unwind a large position over the course of several days may want to quickly detect rapid changes in a liquidity that could negatively impact their execution strategy.
+By detecting changes in market liquidity a market participant can identify periods of when trading may be more or less favourable. For example, an institutional investor wishing to unwind a large position over the course of several days may want to quickly detect rapid changes in a liquidity that could negatively impact their execution strategy. The following description of the limit order book is based on the notation used in \cite{gould2016queue}. 
 
 \section{Properties of the Limit Order Book}
+All modern financial markets are set-up as a double-sided auction between buyers (bid side) and the sellers (ask side) called limit order books (LOBs). A market participant may post orders at specific prices on either side of the book. A limit order, denoted by $x$, is defined as a tuple containing a price, $p_x$, and a size, $w_x$ where $|w_x|>0$:
 
-The LOB at time, $t$, is denoted as $\lambda(t)$, and it represents the set of all orders currently active at time $t$. All bid orders are at the best bid price or lower. The best bid price at time, $t$,  is denoted as:
 \begin{equation}
-b(t) = max p
+x = (p_x, w_x).
+\end{equation}
+
+A limit order's size indicates how many units of an asset a buyer (seller) is willing to trade at $p_x$. The prices for which an order can be submitted at are discrete prices. 
+
+The LOB at time, $t$, is denoted as $\mathcal{L}(t)$, and it represents the set of all orders currently active at time $t$. All bid orders are at the best bid price or lower. The best bid price at time, $t$,  is denoted as:
+\begin{equation}
+b(t) =  \max_{\{x \in \mathcal{L}(t)|w_x<0 \}} p_x
 \end{equation}
 
 All ask orders are placed at the best ask price or higher. The best ask price at time, $t$, is denoted as:
 \begin{equation}
-a(t) = min p
-\end{equation}
-
-There are many types of orders that can be placed in the LOB. In this context, we assume all orders in the LOB at a given time are basic limit orders. That is, they are orders placed at a specific price with a specific size. Therefore, at a price, $p$, and a time, $t$, the total number of orders is:
-\begin{equation}
-n^b(p, t) = \sum w_x
-\end{equation}
-
-On the ask side, it is similarly defined as:
-\begin{equation}
-n^a(p, t) = \sum w_x
+a(t) = \min_{\{x \in \mathcal{L}(t)|w_x>0 \}} p_x
 \end{equation}
 
 The \textit{bid-ask spread} or simply the spread at a time, $t$, is defined as:
 \begin{equation}
 s(t) = a(t) - b(t)
 \end{equation}
-Normalizing the spread by $\pi$ gives the number of price levels
 
-Everytime a trade occurs or a resting limit order is cancelled at that price, size is removed from the LOB at that price. If the size at the b(t) reaches zero then the spread increases the b(t) decreases. 
+The normalized spread, $s_n(t) \geq 0$, can be defined by: 
+\begin{equation}
+s_n(t) = \frac{s(t)}{\pi} - 1
+\end{equation}
 
-All modern financial markets are set-up as a double-sided auction between buyers (BID side) and the sellers (ASK side) called limit order books (LOBs). A market participant may post orders at specific prices on either side of the book.  
+There are many types of orders that can be placed in the LOB. In this context, we assume all orders in the LOB at a given time are basic limit orders. That is, they are orders placed at a specific price with a specific size. Therefore, at a price, $p$, and a time, $t$, the total number of orders is:
+\begin{equation}
+n^b(p, t) = \sum_{\{x \in \mathcal{L}(t)|w_x<0 , p_x=p\}} |w_x|
+\end{equation}
 
-Every LOB has two configuration parameters: the tick size, $\pi >0$, which is the smallest possible price increment between orders at different prices and lot size, which dictates the smallest amount that can be traded. As mentioned in \hl{XXXX}, LOB is essentially a one-dimensional lattice where the dimension is price and every point on the price axis is a multiple \footnote{In most cases these multiples of $\pi$ are strictly positive but in particular markets, such as ED packs and bundles, there may be negative integers of $\pi$, i.e. a price axis with positive and negative prices.} of $\pi$.
+On the ask side, it is similarly defined as:
+\begin{equation}
+n^a(p, t) = \sum_{\{x \in \mathcal{L}(t)|w_x>0 , p_x=p\}}  w_x
+\end{equation}
+
+Everytime a trade occurs or a resting limit order is cancelled at that price, size is removed from the LOB at that price. If the size at the $b(t)$ reaches zero then the spread increases the $b(t)$ decreases. 
+
+Every LOB has two configuration parameters: the tick size, $\pi >0$, which is the smallest possible price increment between orders at different prices and lot size, which dictates the smallest amount that can be traded. As mentioned in \cite{gould2016queue}, LOB is essentially a one-dimensional lattice where the dimension is price and every point on the price axis is a multiple \footnote{In most cases these multiples of $\pi$ are strictly positive but in particular markets, such as ED packs and bundles, there may be negative integers of $\pi$, i.e. a price axis with positive and negative prices.} of $\pi$.
 
 There are two possible distributional changes that are of interest. The first is how the entire distribution of liquidity changes over time. These changes are often associated with events happening in the market such as the start of U.S. trading hours, the release of economic data or a planned speech by the head of the federal reserve. There may also be unplanned events that affect the overall liquidity in the book such as a the 9/11 terrorist attack or a virus outbreak like the Corona virus.
 
