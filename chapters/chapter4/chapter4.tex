@@ -7,7 +7,7 @@ By detecting changes in market liquidity a market participant can identify perio
 All modern financial markets are set-up as a double-sided auction between buyers (bid side) and the sellers (ask side) called limit order books (LOBs). A market participant may post orders at specific prices on either side of the book. A limit order, denoted by $x$, is defined as a tuple containing a price, $p_x$, and a size, $w_x$ where $|w_x|>0$:
 
 \begin{equation}
-x = (p_x, w_x).
+x = \langle p_x, w_x \rangle.
 \end{equation}
 
 A limit order's size indicates how many units of an asset a buyer (seller) is willing to trade at $p_x$. The prices for which an order can be submitted at are discrete prices. 

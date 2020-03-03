@@ -2,19 +2,38 @@
 
 \section{Maximum Mean Discrepancy}
 \label{mmd}
-The maximum mean discrepancy (MMD) is a type of \textit{integral probability metric} that can be used to compare two probability distributions. It makes use of the kernel mean embedding developed in \cite{smola2007hilbert}. The kernel mean embedding can be thought of applying the \textit{kernel trick} to probability measures and mapping them into a higher dimensional feature space. Rather than applying the kernel trick to individual data points and mapping them to an implicit feature space, the kernel mapping, $\phi$, (also called feature map) will be applied to a probability distribution in order to represent it in a reproducing kernel Hilbert space (RKHS), that is $\phi: \mathcal{X} \rightarrow \mathcal{H}$.
+Suppose $n$ samples from a set $X = \{x_1, x_2, ..., x_n\}$ and $m$ samples from a different set $Y=\{y_1, y_2, ..., y_m\}$ are derived from a metric space $\mathcal{X}$. Assume both are distributed as $X \sim  P$ and $Y \sim Q$ respectively. As mentioned in \ref{hyptesting}, there needs to be some notion of distance, $d(X,Y)$, that can be computed between the two samples in order to conduct a two-sample test. Intuitively, if $P$ and $Q$ are very similar then $d(X,Y)$ should be close to zero. On the other hand, if $P$ and $Q$ are very different then $d(X,Y)$ should be large.
 
-Let $k: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ be a kernel function 
-
-Suppose $n$ samples from a set $X = \{x_1, x_2, ..., x_n\}$ and $m$ samples from a different set $Y=\{y_1, y_2, ..., y_m\}$ are observed from a sample space $\mathcal{X}$. Assume both are distributed as $X \sim  P$ and $Y \sim Q$ respectively. The kernel mean embeddings are denoted by $\mu_P = \mathbb{E}_{X \sim P}[\phi(X)] $ and $\mu_Q =\mathbb{E}_{Y \sim Q}[\phi(Y)]$ for samples $X$ and $Y$ respectively, where $\mu_P, \mu_Q \in \mathcal{H}$.
-
-If the kernel mapping into the Hilbert space is injective then $k$ is called  \textit{characteristic}. As \cite{muandet2017kernel} points out, there is no loss if information in this case. See \cite{fukumizu2008kernel} for this proof. This implies that $||\mu_P - \mu_Q ||=0$ if and only if $P=Q$. This leads naturally to the definition of the MMD as:
+One such family of statistical distances is the group of \textit{integral probability metrics}, first described in \cite{muller1997integral}. The basic setup of these metrics is consider a space of functions, $\mathcal{F}$, where every function $f \in \mathcal{F}$ is a mapping such that $f : \mathcal{X}  \rightarrow \mathbb{R}$. An IPM between $P$ and $Q$ can be defined as:
 
 \begin{equation}
-\text{MMD}(P,Q)=|| \mathbb{E}_{X \sim P}[\phi(X)] -  \mathbb{E}_{Y \sim Q}[\phi(Y)]||_\mathcal{H}
+d(P,Q)=\sup _{f \in F}|\underset{X \sim P}{\mathbb{E}}[f(X)]-\underset{Y \sim Q}{\mathbb{E}}[f(Y)]|.
 \end{equation}
 
-Where the MMD can be understood as the distance in $\mathcal{H}$ between the mean embeddings of the features. As long as a kernel mean embedding can be defined on the given data structure, the MMD can be used. This is why it can be applied to non-numeric data such as strings, graphs, and other data structures \cite{hofmann2008kernel}. One advantage of using the MMD for comparing distributions over other classic techniques like Kullback–Leibler (K-L) divergence is the density of the distributions do not have to be estimated as an interim step. 
+The choice of the space of functions, $\mathcal{F}$, determines the kind of distance measured between $P$ and $Q$. [Discuss example using KS distance.]
+
+In \cite{gretton2012kernel}, the authors propose setting $\mathcal{F}$ to the unit ball in a Reproducing Kernel Hilbert space (RKHS), denoted by $\mathcal{H}$, i.e. $\mathcal{F} = \{f : ||f||_{\mathcal{H}} \leq 1\}$. The fact that a RKHS is chosen means there exists a \textit{feature map}, $\phi: \mathcal{X} \rightarrow \mathcal{H}$. In \cite{smola2007hilbert}, the formal definition of the maximum mean discrepancy (MMD) is defined as:
+\begin{equation}
+\label{mmd_theory}
+\text{MMD}(P,Q)=|| \underset{X \sim P}{\mathbb{E}}[\phi(X)] -  \mathbb{E}_{Y \sim Q}[\phi(Y)]||_\mathcal{H}.
+\end{equation}
+
+Where the MMD can be interpreted as the distance in $\mathcal{H}$ between the mean embeddings of the features. As long as a kernel mean embedding can be defined on the given data structure, the MMD can be used. This is why it can be applied to non-numeric data such as strings, graphs, and other structured domains \cite{hofmann2008kernel}. 
+
+Due to the reproducing property, the feature map, $\phi$, has a corresponding kernel function, $k: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ where $k(x, y)=\langle\varphi(x), \varphi(y)\rangle_{\mathcal{H}}$. The proofs for this setting are rigorous and can be explored in \cite{smola2007hilbert} and XXXX and out of scope for discussion in this thesis. For our purposes it is important to understand that the kernel map, $\phi$, does not need to be explicitly computed thanks to the \textit{kernel trick}. Instead, we can only concern ourselves with the computation of the kernel function. Therefore, \ref{mmd_theory} can be rewritten as:
+
+\begin{equation}
+\text{MMD}(P,Q)=\sup _{f \in F}|\underset{X \sim P}{\mathbb{E}}[f(X)]-\underset{Y \sim Q}{\mathbb{E}}[f(Y)]|.
+\end{equation}
+
+If the kernel mapping into the Hilbert space is injective then $k$ is called a \textit{characteristic} kernel function. In  \cite{fukumizu2008kernel}, it is proven using a characteristic function to compute the MMD implies that $||\mu_P - \mu_Q ||=0$ if and only if $P=Q$.  As \cite{muandet2017kernel} points out, there is no loss if information in this case. 
+
+%One advantage of using the MMD for comparing distributions over other classic techniques like Kullback–Leibler (K-L) divergence is the density of the distributions do not have to be estimated as an interim step. 
+
+
+%  The kernel mean embedding can be thought of applying the \textit{kernel trick} to probability measures and mapping them into a higher dimensional feature space. Rather than applying the kernel trick to individual data points and mapping them to an implicit feature space, the kernel mapping, $\phi$, (also called feature map) will be applied to a probability distribution in order to represent it in a reproducing kernel Hilbert space (RKHS), that is $\phi: \mathcal{X} \rightarrow \mathcal{H}$.
+
+%The kernel mean embeddings are denoted by $\mu_P = \mathbb{E}_{X \sim P}[\phi(X)] $ and $\mu_Q =\mathbb{E}_{Y \sim Q}[\phi(Y)]$ for samples $X$ and $Y$ respectively, where $\mu_P, \mu_Q \in \mathcal{H}$.
 
 
 Typically, the actual distributions $P$ and $Q$ are unknown, making $\mu_P$ and $\mu_Q$ also unknown. Therefore, for applications, empirical estimates using the sampled data $X$ and $Y$ must be used instead. As shown in \cite{muandet2017kernel}, the empirical estimate of the kernel mean embeddings, denoted by $\hat{\mu}_P$ and  $\hat{\mu}_Q$ respectively, is
@@ -74,28 +93,23 @@ Thus, as [need citation] points at, the witness function tracks where the densit
 Kernel selection is important because it decides the kind of witness functions that can be learned. For most applications it is simply set to the RBF kernel but ideally it should be selected based on maximizing test power.
 \fi 
  
-The two-sample kernel test statistic is defined in \cite{gretton2012kernel} and uses the MMD as a distance measure for comparing two probability distributions. Where the null hypothesis is that both samples stem from the same distribution,  (i.e. $P=Q$) and the alternative hypothesis is that they are not drawn from the same distribution such that $P \neq Q$.
+Using the properties of the MMD and characteristic kernel functions, a non-parametric two-sample test can now be defined to solve the following non-parametric two-sample hypothesis test. Assuming $P$ and $Q$ are defined as above, 
 
-As mentioned in \hl{hypothesis testing section}, every two-sample test follows a similar procedure, therefore using the MMD as a measure of distance, the steps to perform a two-sample test  are as follows:
 
-1.Distance MMD2k(P,Q):
-2.Estimate the distribution distance from data: MMD(X,Y)
-3.Choose a rejection threshold calpha:
+In \cite{gretton2012kernel}, the authors defined a two-sample kernel test statistic using the MMD as a distance measure for comparing two probability distributions. 
+1. Choosing a rejection threshold, $c_\alpha > 0$, and kernel function, $k$, as defined above.
+2. Estimate MMD$(P,Q)$ using equation 6 or 7.
+3. If $\hat{MMD} > c_\alpha$, reject $H_0$, else accept $H_0$
 
-Under H0, mMMD converges to distribution depending on data, k
+Notice the choice of kernel function and threshold here is critical for assessing performance. Because noisy samples are used to estimate the distributions of $P$ and $Q$, it will almost certainly never be exactly zero even if a characteristic kernel function is used and even if both samples come from the exact same distribution.
+
+%Under H0, mMMD converges to distribution depending on data, k
 
 \section{Related Work}
 
-One of the first papers to use the term \textit{kernel change point detection} was in \cite{desobry2005online}. The authors present an online kernel change point detection model based on single class support vector machines ($\nu$-SVMs). They train a single class support vector on a past set, $\mathbf{x}_{t,1}={x_{t-m_1},...,x_{t-1}}$ of size $m_1$ and train another single class support vector on a future set $\mathbf{x}_{t,2}={x_t,...,x_{t+m_2-1}}$ of size $m_2$. A ratio is then computed between the two sets that acts as the dissimilarity measure in Hilbert space. If the sets are sufficiently dissimilar over some predetermined threshold,then a change point is assigned to the time step that spits the two sets of data. The authors argue that a dissimilarity measure between kernel projection of points in a Hilbert space should estimate the \textit{density supports} rather than estimate the probability distributions of each set of points. While this approach inspired a lot of interesting research that will be discussed below, modern, practical approaches have used different approaches.
+One of the first papers to use the term \textit{kernel change point detection} was in \cite{desobry2005online}. The authors present an online kernel change point detection model based on single class support vector machines ($\nu$-SVMs). They train a single class support vector on a past set, $\mathbf{x}_{t,1}={x_{t-m_1},...,x_{t-1}}$ of size $m_1$ and train another single class support vector on a future set $\mathbf{x}_{t,2}={x_t,...,x_{t+m_2-1}}$ of size $m_2$. A ratio is then computed between the two sets that acts as the dissimilarity measure in Hilbert space. If the sets are sufficiently dissimilar over some predetermined threshold,then a change point is assigned to the time step that spits the two sets of data. The authors argue that a dissimilarity measure between kernel projection of points in a Hilbert space should estimate the \textit{density supports} rather than estimate the probability distributions of each set of points. While this approach inspired a lot of interesting research that will be discussed below, it has not been studied since.
 
-In 2007, Harchoui and Cappe \cite{harchaoui2007retrospective} approached the off-line change point problem with a fixed number of change points using kernel change point detection. This was further extended to an unknown number of change points in 2012 by Arlot et al. \cite{arlot2012kernel}. \hl{Finally, Garreau and Arlot extended this in line of research kernel change points in the off-line setting of detecting change points.} Fundamentally, their method is the kernel version of the following least squares optimization problem:
-
-\begin{equation}
-J(\tau, \mathbf{y}) = \frac{1}{n} \sum_{k=1}^K(\tau) \sum (Y_i - \hat(Y_k)^2 + \beta \text{pen}(\tau)
-\end{equation}
-
-
-The benefits of this off-line kernel change point detection is that it operates on any kind of data for which a kernel can properly reproduce a Hilbert space. For example, it can be applied to image data, histogram data, as well as $d-$dimensional vectors in $\mathbb{R}^d$. Garreau shows their KCP procedure outputs an off-line segmentation near optimal with high probability. Lastly, the authors recommend choosing the kernel based on best possible signal to noise ratio that the distribution gives based on $ \Delta^2 / M^2$ . Therefore, some prior knowledge or training set is necessary for calibrating the kernel. 
+In \cite{harchaoui2007retrospective}, the authors approached the off-line change point problem with a fixed number of change points using kernel change point detection. This was further extended to an unknown number of change points in \cite{arlot2012kernel}. Garreau shows their KCP procedure outputs an off-line segmentation near optimal with high probability. Offline kernel change point detection differs in techniques than the online one, but they do have several common benefits. One is that it operates on any kind of data for which a kernel can properly reproduce a Hilbert space. For example, it can be applied to image data, histogram data, as well as $d-$dimensional vectors in $\mathbb{R}^d$. Lastly, the authors recommend choosing the kernel based on best possible signal to noise ratio. Therefore, some prior knowledge of a reference or training set is necessary for calibrating the kernel. 
 
 In  \cite{li2015m}, the authors make use of the B-test introduced in \cite{zaremba2013b} and develop an offline and online change point detection algorithm called the MStats algorithm (the authors also refer to this algorithm as the Scan-B algorithm in a follow-up paper). At each time-step, the online model samples new data from a window of size $B_0$ and does a B-test with $N$ past samples that are kept as reference samples. 
 
