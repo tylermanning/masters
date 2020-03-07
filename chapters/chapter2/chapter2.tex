@@ -4,7 +4,7 @@ This chapter describes how the change point problem will be formulated in this t
 \section{Hypothesis Testing}
 \label{hyptesting}
 %Two-sample hypothesis testing concerns itself with the following problem: 
-Let $x$ and $y$ be random variables defined on the topological space $\mathcal{X}$ with probability distributions $P$ and $Q$ respectively. Assume we draw $n$ observations from $P$ and $m$ observations from $Q$ resulting in two samples $X=\{x_1, x_2, ...,x_n\} \sim P$ and $X=\{y_1, y_2, ...,y_n\} \sim Q$, where each sample is independently and identically distributed with respect to $P$ and $Q$. The main question posed in this thesis is can we determine if $P$ and $Q$ are statistically the same or different distributions. 
+Let $x$ and $y$ be random variables defined on the topological space $\mathcal{X}$ with probability distributions $P$ and $Q$ respectively. Assume we draw $n$ observations from $P$ and $m$ observations from $Q$ resulting in two samples $X=\{x_1, x_2, ...,x_n\} \sim P$ and $Y=\{y_1, y_2, ...,y_m\} \sim Q$, where each sample is independently and identically distributed with respect to $P$ and $Q$. The main question posed in this thesis is can we determine if $P$ and $Q$ are statistically the same or different distributions. 
 
 To answer this question, we use the \textit{statistical hypothesis testing} framework as it is described in \cite{casella2002statistical}. Generally, a $hypothesis$ is a statement about a population parameter, $\theta$. Examples of a population parameter are the population mean, variance or other higher order moments. In hypothesis testing, we trying to determine whether one of two complementary hypotheses is true. The first, denoted by $H_0$, is called the \textit{null hypothesis} and it states that $\theta \in \Theta_0$ where $\Theta_0$ is some subset of the parameter space. The second hypothesis, denoted by $H_1$, is called the \textit{alternative hypothesis} and it states that $\theta \in \Theta_0^c$. For instance, if it is believed $P$ and $Q$ are distinguishable by their population means, $\mu_P$ and $\mu_Q$, then the possible hypotheses are:
  
@@ -22,13 +22,15 @@ How do we pick between $H_0$ and $H_1$ in equation \ref{ex_hyp}? Every hypothesi
 \hat{T} = T(X, Y).
 \end{equation}
 
-This test statistic is compared to a significance level, $\alpha \in [0,1]$ that is chosen  at the outset. Common choices for $\alpha$ are $0.1, 0.05$ and $0.01$ \cite{moore1993introduction}. Finally, a \textit{p-value} is calculated using the test statistic $\hat{p}=P(T \geq \hat{T} | H_0)$. The p-value is the probability of observing $\hat{T}$ under the null hypothesis. A p-value < $\alpha$ would be improbable under the null hypothesis, therefore, in this situation it is rejected and the alternative hypothesis is accepted.
+The test statistic $\hat{T}$ is then compared to some \textit{threshold} selected by the user. There many ways to set such a threshold, but usually if the test statistic exceeds the threshold then $H_0$ is rejected and $H_1$ is accepted. Otherwise, the hypothesis test fails to reject $H_0$. 
+
+A common way to set the threshold is through a significance level, $\alpha \in [0,1]$ that is chosen at the outset. Common choices for $\alpha$ are $0.1, 0.05$ and $0.01$ \cite{moore1993introduction}. The test statistic is compared to $\alpha$ by computing a \textit{p-value} that is estimated by $\hat{p}=P(T \geq \hat{T} | H_0)$. The p-value is the probability of observing $\hat{T}$ under the null hypothesis.  A p-value < $\alpha$ would be improbable under the null hypothesis, therefore, in this situation it is rejected and the alternative hypothesis is accepted.
 
 Given the binary outcome of a two-sample test, it is clear the hypothesis test can fail in the two following ways. The first is rejecting the null hypothesis when it is correct. This is known as a false positive or a type-I error and is upper-bounded by the chosen significance level, $ \alpha$. It is equivalent to following conditional probability: $\mathbb{P}(\text{reject } H_0 | H_0 \text{ is true})$. The second possible source of error is  a false negative or type-II error . The probability of committing a type-II error is denoted as $\beta=\mathbb{P}\left(\text {accept } H_{0} | H_{0} \text { is false}\right)\). The quantity $1-\beta$ is referred to as the \textit{power} of a test. Maximizing test power is an important part of designing new algorithms and is typically used to compare different methods. 
 
 Often there is a trade-off between type-I and type-II errors and the practitioner must decide how to balance the two given their domain-specific knowledge of the problem. In some cases, it may be desirable to sacrifice one for the other. For example, in the medical field \cite{lieberman2009type}, a false positive diagnosis (type-I error) may be more desirable than missing a diagnosis (type-II error) which would result in never giving treatment to a patient. 
 
-Recall $P$ and $Q$ are unknown, $X$ and $Y$ are the observed data and the other settings are chosen according to the specific hypothesis test.  This means the main decision left up to the practitioner is determining what statistical test to use. In other words, what $T$ should be used for evaluating equation \ref{test_func}? The choice should depend on how $P$ and $Q$ may differ from each other. For example, the Student $t$-test is a two-sample test for determining if samples of univariate data come from a population with the same mean \cite{student1908probable}. A generalization of the Student $t$-test for the multivariate case is the Hotelling $T^2$ test that compares whether the means of two multivariate samples are significantly different \cite{hotelling1992generalization}. Both of these are parametric tests as they assume the samples are normally distributed. 
+If $P$ and $Q$ are unknown,$X$ and $Y$ are the observed data and the other settings are chosen according to the specific hypothesis test.  This means the main decision left up to the practitioner is determining what statistical test to use. In other words, what $T$ should be used for evaluating equation \ref{test_func}? The choice should depend on how $P$ and $Q$ may differ from each other. For example, the Student $t$-test is a two-sample test for determining if samples of univariate data come from a population with the same mean \cite{student1908probable}. A generalization of the Student $t$-test for the multivariate case is the Hotelling $T^2$ test that compares whether the means of two multivariate samples are significantly different \cite{hotelling1992generalization}. Both of these are parametric tests as they assume the samples are normally distributed. 
 
 Alternatively, non-parametric tests make no assumptions about the distributions $P$ and $Q$. For example, the Kolmogorov-Smirnov test (KS test) \cite{massey1951kolmogorov} can determine whether or not two univariate samples come from the same distribution. This is done by computing the \textit{supremum} of the difference of the empirical cumulative distribution functions from each sample. The KS test does not specify what distribution the samples come from, only if they differ according to the KS statistic. More recently, the kernel two-sample test introduced in \cite{gretton2012kernel} is another flexible, non-parametric test. It is not limited to one dimensional data, and can be applied to non-numeric data. It is based on the \textit{maximum mean discrepancy} (MMD) statistic and is capable of detecting any kind of change in distribution. It is a focus in this thesis and is discussed in more detail in section \ref{mmd}.
 
@@ -43,6 +45,7 @@ The most recent $w$ observations of $X$ will be compared to some reference set o
 
 Let the probability distribution, $P_{t+1}$, denote be the distribution after the change point has occurred. At each time, $t$, the online change point detection problem is performing the following hypothesis test:
 \begin{equation}
+\label{formula_cpd}
   \begin{cases}
     H_0: X_{ref} \text{ and } X_w \sim  P & \text{(no change point occured)} \\
     H_1: X_{ref} \sim P \text{ and }  X_w  \sim Q & \text{(a change point occured)}
@@ -57,13 +60,23 @@ The size of the window, $w$, is an important consideration that is typically cho
 \subsection{Performance Measures}
 %Because of the unsupervised nature of detecting change points, it is difficult to evaluate the performance of change point detection models with real world data. Many papers detail asymptotic or non-asymptotic theoretical bounds of their proposed change point methods.  These theoretical results are typically compared across different change point methods for benchmarking a new algorithm.
 
-Two main issues arise when detecting change points in a stream of data. The first is detecting a change point when there is no actual statistical change in the observed sequence. These are typically called \textit{false alarms} or false detections in the change point detection literature. The false alarm rate is defined by a metric known as the \textit{average time to false alarm} (TTFA).   It is defined as:
-\begin{equation}
-TTFA = \mathbb{E}[\text{ }  \hat{t} \text{ } |\text{ }  t^* \text{ does not exist} ],
-\end{equation}
-where it is the expected number of observations that are observed before a change point is incorrectly detected. In other words, it is the average amount of time until a change is detected given a sequence of observations with no change. Therefore, a larger value of TTFA is preferable. From a hypothesis testing perspective, this is equivalent to rejecting $H_0$ in  when it should not be rejected, i.e. type I error. In the literature it is also referred to average run length (ARL) or average run length under the null (ARL$_0$). 
+Every time, the change point hypothesis test in is evaluated in \ref{formula_cpd} two main issues arise. The first is detecting a change point when there is no actual change in the observed sequence. These are typically called \textit{false alarms} or false detections in the change point detection literature \cite{lee2010change}. The second issue is not detecting a change point when one occurs, called a \textit{missed detection}. This could be caused by detecting a change point much too late for it to be of any use or simply missing it altogether. However, simply counting the number of false alarms or missed detections does not capture the goal of the online change point detection problem, which is to quickly detect change points over time, while minimizing false alarms. 
 
-The second issue is not detecting a change point when one occurs. This could be caused by detecting a change point much too late for it to be of any use or simply missing it altogether. It is measured by the missed number of detections and can be evaluated as a percentage by:
+The expected amount of time that must pass before observing a false alarm is defined by a metric known as the \textit{average time to false alarm} (TTFA). It is defined as:
+\begin{equation}
+\label{ttfa}
+\text{TTFA} = \mathbb{E}[\text{ }  \hat{t} \text{ } |\text{ }  t^* \text{ does not exist} ],
+\end{equation}
+where it is the expected number of observations that are observed before a change point is incorrectly detected. Therefore, a larger value of TTFA is preferable. In the literature it is also referred to average run length (ARL) or average run length under the null (ARL$_0$) \cite{johnson2017detecting}. 
+
+The second method of evaluating the accuracy in the context of online change point detection is the \textit{expected detection delay} (EDD). It is the expected amount of time that passes before a true change point is detected. It is defined as 
+\begin{equation}
+\label{edd}
+\text{EDD} = \mathbb{E}[\text{ }  \hat{t} \text{ } |\text{ }  t^* \text{ does exists} ].
+\end{equation}
+
+An online change point detection technique aims to minimize EDD, while maximizing TTFA. Balancing the two is similar to balancing type-I and type-II error discussed in section \ref{hyptesting}.
+
 %\begin{equation}
 % \text{Missed Detections = 100*\frac{\text{\# of missed changes}}{total change points}}
 % \end{equation}
@@ -89,16 +102,17 @@ The closer the predicted change points are to the actual change points, the smal
 If labelled change points are available for a real world dataset or a synthetic dataset, then the ground truth change point vector, 
 $t^*$, is known. Evaluating performance in this case is the same as evaluating a binary classifier from a supervised learning problem. For example, the metrics from discussed in hypothesis testing, type-I error (false positives) and type-II error (false negatives), are commonly used for evaluating change point detection performance. The false positive rate (FPR) can be calculated by $FPR = FP / N$. Plotting the false positive rate and the true positive rate, gives the receiver operator characteristic curve. The area under this curve (AUC), is calculated and compared to random baseline performance of 0.5 that would be equivalent to classification by tossing a coin.
 
-%For example the \textit{Hausdorff} metric can be used. It measures the furthest temporal distance between a predicted change point $\hat{\tau}$ and $\tau^*$. It is defined as:
 
+\iffalse
 Other standard classifier metrics can also used for comparing $\hat{t}$ and $t^*$. This includes the  F1-Score that is based on a classifier's precision and recall:
 \begin{equation}
 F_1(\hat{t}, t^*) = 2 * \frac{\text{precision*recall}}{\text{precision + recall}}
 \end{equation}
 
- F1-Score is defined as the harmonic mean of precision and recall. Precision is defined as the ratio of true positives (TP) to the
+F1-Score is defined as the harmonic mean of precision and recall. Precision is defined as the ratio of true positives (TP) to the
 number of true positives (TP) and false positives (FP) and recall is defined as the ratio the number of true positives to the
 number of true positives plus the number of false negatives. F1-Score is best when F1 = 1 (perfect precision and recall) and reaches its worst value at F1 = 0. Depending on the context, any other classifier evaluation tools such as the Receiver Operating Characteristics Curve and the Precision Recall Curve may be used as well.
+\fi
 
 \section{Classic Algorithms}
 Presented below are the fundamental approaches to online change point detection that have been very influential on modern approaches. Many modern algorithms are variants of the classic algorithms discussed below. In the following sections let $X_t$ be defined as it is in \ref{probFormulation}.
@@ -114,7 +128,7 @@ where $\kappa \in \mathbb{R}$ is a constant that controls how sensitive the algo
 Tuning the hyper-parameters can drastically change the performance of the algorithm. The parameter $\kappa$ is used to control the trade-off between false alarms and missed detections. Choosing a lower $\kappa$ makes the control chart detect change points more often and, consequently, increases the false alarms. Whereas a higher $\kappa$ results in less false detections but also more missed detections. The chosen sample size, $N$, is also critical and its effect on the performance of Shewart control charts is studied in \cite{haridy2017effect}.
 
 \subsection{CUSUM}
-Similar to the Shewart control chart, the CUSUM algorithm tracks a statistic over time relative to a predetermined threshold. CUSUM is best applied to a process that is already under control. It can be thought of accumulating the information of current and past samples. 
+Similar to the Shewart control chart, the CUSUM algorithm tracks a statistic over time relative to a predetermined threshold \cite{page1954continuous}. CUSUM is best applied to a process that is already under control. It can be thought of accumulating the information of current and past samples. 
 
 The algorithm is defined by a statistic, $S_t \in \mathbb{R}$, that is recursively updated after each sample, $X_t$, is observed, such that:
 \begin{equation}
@@ -125,14 +139,14 @@ The algorithm is defined by a statistic, $S_t \in \mathbb{R}$, that is recursive
 \end{equation}
 where $Z_t=ln(\frac{f_{1}(X_i)}{f_{0}(X_i)})$ and the statistic $S_t$ is compared to a threshold $h \in \mathbb{R}$ that is predetermined by the user. Functions $f_0$ and $f_1$ are probability density functions for the pre-change distribution and post-change distribution.  If $S_t \geq h$ then a change point is declared at time $t$ and the algorithm is either stopped or restarted. Given that the statistic only flags change points when greater than a threshold, this algorithm only detects positive changes in the distribution. In \cite{page1954continuous}, it is suggested to combine two CUSUM algorithms to detect positive and negative changes in a distributional parameter.
 
-As a parametric algorithm, it is assumed $f_0$ and $f_1$ are known at the outset. In most applications, this is quite limiting and unrealistic. Therefore, in cases where they are unknown, maximum likelihood estimates of each distribution's parameters are usually computed.
+As a parametric algorithm, it is assumed $f_0$ and $f_1$ are known at the outset. In most applications, this is quite limiting and unrealistic. Therefore, in cases where they are unknown, \textit{maximum likelihood estimates} of each distribution's parameters are usually computed. See \cite{kay1993fundamentals} for details on maximum likelihood estimation. 
 
 Several extensions to the CUSUM algorithm have been proposed such as the filtered-derivative extension introduced in \cite{basseville1981edge}, which uses the change of the discrete derivative of a signal over time to detect a change point. In \cite{lucas1982fast}, a fast initial response (FIR) CUSUM algorithm is proposed where the starting value of initial cumulative sums adapts over time. Instead of resetting $S_0$ to zero as shown above, it is reset to a non-zero value, typically based on the threshold chosen. This gives the algorithm a head-start in quickly detecting when a process is out of control and is especially useful for processes that don't start in control.
 
 Finally, since CUSUM is typically better at detecting small shifts in signals and the Shewart control chart is faster at detecting larger changes, the two can be combined \cite{lucas1982combined}. The combined Shewart-CUSUM algorithm leverages the strengths of both techniques for better overall performance. See  \cite{yashchin1985analysis} and \cite{westgard1977combined} for more details. 
 
 \subsection{EWMA}
-First described in \cite{roberts1959control} as a "geometric average", the exponentially weighted moving average (EWMA) is a type of moving average that applies exponential weighting to time series samples. Initially used as a forecasting technique in the econometrics field for smoothing noisy functions, the EWMA can also be used for determining out of control processes as shown in \cite{hunter1986exponentially}. Rather than weighing all observations uniformly like the standard CUSUM algorithm or a simple moving average, a decay factor (also called a  forgetting factor), $\lambda \in [0,1]$, is used to control how much weight is distributed over the previous observations. As each new observation arrives, the EWMA statistic, $E_t \in \mathbb{R}$, is recursively updated and compared to a threshold. If the EWMA statistic exceeds the threshold then the process is deemed out of control or, in other words, a change point is detected.
+First described in \cite{roberts1959control} as a \textit{geometric average}, the exponentially weighted moving average (EWMA) is a type of moving average that applies exponential weighting to time series samples. Initially used as a forecasting technique in the econometrics field for smoothing noisy functions, the EWMA can also be used for determining out of control processes as shown in \cite{hunter1986exponentially}. Rather than weighing all observations uniformly like the standard CUSUM algorithm or a simple moving average, a decay factor (also called a  forgetting factor), $\lambda \in [0,1]$, is used to control how much weight is distributed over the previous observations. As each new observation arrives, the EWMA statistic, $E_t \in \mathbb{R}$, is recursively updated and compared to a threshold. If the EWMA statistic exceeds the threshold then the process is deemed out of control or, in other words, a change point is detected.
 
 The EWMA statistic is calculated as follows at each time step, $t$:
 $$E_t = \lambda X_t + (1-\lambda)E_{t-1}. $$
