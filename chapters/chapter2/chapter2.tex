@@ -6,13 +6,13 @@ This chapter describes how the change point problem will be formulated in this t
 %Two-sample hypothesis testing concerns itself with the following problem: 
 Let $x$ and $y$ be random variables defined on the topological space $\mathcal{X}$ with probability distributions $P$ and $Q$ respectively. Assume we draw $n$ observations from $P$ and $m$ observations from $Q$ resulting in two samples $X=\{x_1, x_2, ...,x_n\} \sim P$ and $Y=\{y_1, y_2, ...,y_m\} \sim Q$, where each sample is independently and identically distributed with respect to $P$ and $Q$. The main question posed in this thesis is can we determine if $P$ and $Q$ are statistically the same or different distributions. 
 
-To answer this question, we use the \textit{statistical hypothesis testing} framework as it is described in \cite{casella2002statistical}. Generally, a $hypothesis$ is a statement about a population parameter, $\theta$. Examples of a population parameter are the population mean, variance or other higher order moments. In hypothesis testing, we trying to determine whether one of two complementary hypotheses is true. The first, denoted by $H_0$, is called the \textit{null hypothesis} and it states that $\theta \in \Theta_0$ where $\Theta_0$ is some subset of the parameter space. The second hypothesis, denoted by $H_1$, is called the \textit{alternative hypothesis} and it states that $\theta \in \Theta_0^c$. For instance, if it is believed $P$ and $Q$ are distinguishable by their population means, $\mu_P$ and $\mu_Q$, then the possible hypotheses are:
+To answer this question, we use the \textit{statistical hypothesis testing} framework as it is described in \cite{casella2002statistical}. Generally, a $hypothesis$ is a statement about a population parameter, $\theta$. Examples of a population parameter are the population mean, variance or other higher order moments. In hypothesis testing, we trying to determine whether one of two complementary hypotheses is true. The first, denoted by $H_0$, is called the \textit{null hypothesis} and it states that $\theta \in \Theta_0$ where $\Theta_0$ is some subset of the parameter space. The second hypothesis, denoted by $H_1$, is called the \textit{alternative hypothesis} and it states that $\theta \in \Theta_0^c$. For instance, if it is believed $P$ and $Q$ are distinguishable by their population means, $\mathbb{E}[P]$ and $\mathbb{E}[Q]$, then the possible hypotheses are:
  
 \begin{equation}
 \label{ex_hyp}
   \begin{cases}
-    H_0: \mu_Q \in \{\mu_P \} & \text{(same mean, i.e. } P=Q) \\
-    H_1: \mu_Q \notin \{\mu_P \} & \text{(different mean, i.e. } P \neq Q). 
+    H_0: \mathbb{E}[Q] \in \{\mathbb{E}[P]\} & \text{(same mean, i.e. } P=Q) \\
+    H_1: \mathbb{E}[Q] \notin \{\mathbb{E}[P] \} & \text{(different mean, i.e. } P \neq Q). 
   \end{cases}
 \end{equation}
 
@@ -30,7 +30,7 @@ Given the binary outcome of a two-sample test, it is clear the hypothesis test c
 
 Often there is a trade-off between type-I and type-II errors and the practitioner must decide how to balance the two given their domain-specific knowledge of the problem. In some cases, it may be desirable to sacrifice one for the other. For example, in the medical field \cite{lieberman2009type}, a false positive diagnosis (type-I error) may be more desirable than missing a diagnosis (type-II error) which would result in never giving treatment to a patient. 
 
-If $P$ and $Q$ are unknown,$X$ and $Y$ are the observed data and the other settings are chosen according to the specific hypothesis test.  This means the main decision left up to the practitioner is determining what statistical test to use. In other words, what $T$ should be used for evaluating equation \ref{test_func}? The choice should depend on how $P$ and $Q$ may differ from each other. For example, the Student $t$-test is a two-sample test for determining if samples of univariate data come from a population with the same mean \cite{student1908probable}. A generalization of the Student $t$-test for the multivariate case is the Hotelling $T^2$ test that compares whether the means of two multivariate samples are significantly different \cite{hotelling1992generalization}. Both of these are parametric tests as they assume the samples are normally distributed. 
+Note there is not a lot of information at our disposal for constructing a non-parametric two-sample hypothesis test. Distributions $P$ and $Q$ are unknown, $X$ and $Y$ are the observed data and the other settings are chosen according to the specific hypothesis test.  This means the main decision left up to the practitioner is determining what statistical test to use. In other words, what $T$ should be used for evaluating equation \ref{test_func}? The choice should depend on how $P$ and $Q$ may differ from each other. For example, the Student $t$-test is a two-sample test for determining if samples of univariate data come from a population with the same mean \cite{student1908probable}. A generalization of the Student $t$-test for the multivariate case is the Hotelling $T^2$ test that compares whether the means of two multivariate samples are significantly different \cite{hotelling1992generalization}. Both of these are parametric tests as they assume the samples are normally distributed. 
 
 Alternatively, non-parametric tests make no assumptions about the distributions $P$ and $Q$. For example, the Kolmogorov-Smirnov test (KS test) \cite{massey1951kolmogorov} can determine whether or not two univariate samples come from the same distribution. This is done by computing the \textit{supremum} of the difference of the empirical cumulative distribution functions from each sample. The KS test does not specify what distribution the samples come from, only if they differ according to the KS statistic. More recently, the kernel two-sample test introduced in \cite{gretton2012kernel} is another flexible, non-parametric test. It is not limited to one dimensional data, and can be applied to non-numeric data. It is based on the \textit{maximum mean discrepancy} (MMD) statistic and is capable of detecting any kind of change in distribution. It is a focus in this thesis and is discussed in more detail in section \ref{mmd}.
 
@@ -39,9 +39,11 @@ Because there is no official standard formulation for the online change point de
 
 \subsection{Change Point Detection Problem}
 \label{probFormulation}
-Consider a data stream $X$ to be a sequence of random variables, $X_1, X_2, X_3,...$ where each $X_t$ for $t=0,1,2,...$ is generated by some probability distribution $P_t$ and each $X_t$ is independent of the one that came before it. A change point occurs at time $t+1$ if $P_t \neq P_{t+1}$. In reality it is impossible to detect a real change point instantaneously. 
+Consider a data stream $X$ to be a sequence of random variables, $X_1, X_2, X_3,...$ where each $X_t$ for $t=0,1,2,...$ is generated by some probability distribution $P_t$ and each $X_t$ is independent of the one that came before it. A change point occurs at time $t+1$ if $P_t \neq P_{t+1}$. The goal of online change point detection is detecting this change point as soon as possible. 
 
-The most recent $w$ observations of $X$ will be compared to some reference set of $X$ where $ w \in \mathbb{Z}^+$. Let this recent set be denoted as $X_t^w = \{X_{t-w},...,X_{t-1}, X_t\}$ whose length is the window, $w$. Let the reference set be denoted by $X_t^{ref}= \{X_0, X_1, ..., X_{t-w} \}$ where the distribution of $P_0 = P_1=...P_{t-w}$ is sampled from a common distribution $P$. What is this reference set? It is data that is known to be distributed consistently prior to a change point. In the process control literature \cite{bersimis2007multivariate}, it is known as the in-control distribution. We will use these terms interchangeably as they all capture the same idea. We do not explicitly state how many observations are stored for $X_t^{ref}$ because this depends on the change point detection method used. 
+Consider the case where we don't know when $P_t \neq P_{t+1}$ and we rely only on the observed values $X_t$ to answer this question. We can re-frame the online change point problem to the problem of comparing two sets from $X$. The intuition behind this is simple. If indeed a change point occurs then any observed values after the change point should exhibit a statistical difference with observed values prior to the change point. We simply need to decide what observations should be part of each set so that a significant comparison can be made. Using this approach, a general formulation can now be made.
+
+Let $w$ be the number of most recent observations of $X$. Let this set be denoted by $X_t^w = \{X_{t-w},...,X_{t-1}, X_t\}$ whose length is the window, $w$ where $ w \in \mathbb{Z}^+$. This recent set will be compared to some reference set of $X$ denoted by $X_t^{ref}= \{X_0, X_1, ..., X_{t-w} \}$ whose distributions $P_0 = P_1=...= P_{t-w}$ are sampled from a common distribution $P$. What is this reference set? It is data that is known to be distributed consistently prior to a change point. In the process control literature, it is known as the in-control distribution \cite{bersimis2007multivariate}. We will use these terms interchangeably as they capture the same idea. We do not explicitly state how many observations are stored for $X_t^{ref}$ because this depends on the change point detection method used. 
 
 Let the probability distribution, $P_{t+1}$, denote be the distribution after the change point has occurred. At each time, $t$, the online change point detection problem is performing the following hypothesis test:
 \begin{equation}
@@ -55,7 +57,7 @@ If the null hypothesis is true then the streaming data is distributed consistent
 
 Many change point detection algorithms define a statistic that is computed using each set before and after the possible change point. If the statistic is above a threshold, $h \in \mathbb{R}$, then time $t$ is classified as a change point. The estimated change point time is denoted as $\hat{t}$ and can be compared to underlying true change point, $t^*$, if it is provided.
 
-The size of the window, $w$, is an important consideration that is typically chosen based on the problem being solved. A small  window will detect change points more frequently resulting in fast change point detection but at the cost of more incorrect detections. A large window will have the opposite problem. In this case the change point detector will have less incorrect detections but will be slower to detect real change points.
+The size of the window, $w$, is an important consideration that is typically chosen based on the problem being solved. A small  window will detect change points more frequently resulting in fast change point detection but at the cost of more incorrect detections. A large window will have the opposite problem. The change point method will have less incorrect detections but will be slower to detect real change points.
 
 \subsection{Performance Measures}
 %Because of the unsupervised nature of detecting change points, it is difficult to evaluate the performance of change point detection models with real world data. Many papers detail asymptotic or non-asymptotic theoretical bounds of their proposed change point methods.  These theoretical results are typically compared across different change point methods for benchmarking a new algorithm.
@@ -75,7 +77,7 @@ The second method of evaluating the accuracy in the context of online change poi
 \text{EDD} = \mathbb{E}[\text{ }  \hat{t} \text{ } |\text{ }  t^* \text{ does exists} ].
 \end{equation}
 
-An online change point detection technique aims to minimize EDD, while maximizing TTFA. Balancing the two is similar to balancing type-I and type-II error discussed in section \ref{hyptesting}.
+An online change point detection technique aims to minimize EDD, while maximizing TTFA. A lower EDD will necessarily result in a lower TTFA, which is undesirable. Balancing the two is similar to balancing type-I and type-II error discussed in section \ref{hyptesting}, where the practitioner may one to sacrifice one for the other.
 
 %\begin{equation}
 % \text{Missed Detections = 100*\frac{\text{\# of missed changes}}{total change points}}
@@ -92,15 +94,6 @@ An online change point detection technique aims to minimize EDD, while maximizin
 
 %When detecting changes of a distribution, a user may want to quantify the size of the change in the mean by
 %$|\mathbb{E}[X_{\tau}]-\mathbb{E}[X_{\tau+1}]|$ or, similarly, the size of the change in the variance by $|\text{Var}[X_{\tau}]-\text{Var}[X_{\tau+1}]|$.
-
-In cases where a change point is detected, the average detection delay (ADD) is used to estimate the average time it takes for a change point to be detected. It is computed by comparing the time difference between a predicted change point and an actual change point. This difference is then normalized the total by the total number of change points:
-\begin{equation}
-\text{ADD} = \frac{\sum_i^{\#CP} |\hat{t_i} - t^*|}{\#CP}
-\end{equation}
-The closer the predicted change points are to the actual change points, the smaller the average detection delay. Because it relies on ground truth change points, it can only be used when experimenting on synthetic data where all the information is available.%Therefore, the ADD can range from $(0, \inf)$. 
-
-If labelled change points are available for a real world dataset or a synthetic dataset, then the ground truth change point vector, 
-$t^*$, is known. Evaluating performance in this case is the same as evaluating a binary classifier from a supervised learning problem. For example, the metrics from discussed in hypothesis testing, type-I error (false positives) and type-II error (false negatives), are commonly used for evaluating change point detection performance. The false positive rate (FPR) can be calculated by $FPR = FP / N$. Plotting the false positive rate and the true positive rate, gives the receiver operator characteristic curve. The area under this curve (AUC), is calculated and compared to random baseline performance of 0.5 that would be equivalent to classification by tossing a coin.
 
 
 \iffalse
