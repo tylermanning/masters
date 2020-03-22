@@ -44,12 +44,14 @@ n^a(p, t) = \sum_{\{x \in \mathcal{L}(t)|w_x>0 , p_x=p\}}  w_x
 
 Everytime a trade occurs or a resting limit order is cancelled at that price, size is removed from the LOB at that price. If the size at the $b(t)$ reaches zero then the spread increases the $b(t)$ decreases. 
 
+
 Every LOB has two configuration parameters: the tick size, $\pi >0$, which is the smallest possible price increment between orders at different prices and lot size, which dictates the smallest amount that can be traded. As mentioned in \cite{gould2016queue}, LOB is essentially a one-dimensional lattice where the dimension is price and every point on the price axis is a multiple \footnote{In most cases these multiples of $\pi$ are strictly positive but in particular markets, such as ED packs and bundles, there may be negative integers of $\pi$, i.e. a price axis with positive and negative prices.} of $\pi$.
 
 There are two possible distributional changes that are of interest. The first is how the entire distribution of liquidity changes over time. These changes are often associated with events happening in the market such as the start of U.S. trading hours, the release of economic data or a planned speech by the head of the federal reserve. There may also be unplanned events that affect the overall liquidity in the book such as a the 9/11 terrorist attack or a virus outbreak like the Corona virus.
 
-The second is how the distribution of the bid orders differs from the distribution of the ask orders. Typically, the distribution of liquidity on each side of the book is more or less symmetric. However, there have been studies that have shown times when there is an asymmetry between the two sides. This asymmetry has been shown to correlate to price changes. 
+\input{images/book.tikz}
 
+The second is how the distribution of the bid orders differs from the distribution of the ask orders. Typically, the distribution of liquidity on each side of the book is more or less symmetric. However, there have been studies that have shown times when there is an asymmetry between the two sides. This asymmetry has been shown to correlate to price changes. 
 
 
 \section{Dataset Construction}

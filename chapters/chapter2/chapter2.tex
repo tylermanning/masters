@@ -26,7 +26,7 @@ The test statistic $\hat{T}$ is then compared to some \textit{threshold} selecte
 
 A common way to set the threshold is through a significance level, $\alpha \in [0,1]$ that is chosen at the outset. Common choices for $\alpha$ are $0.1, 0.05$ and $0.01$ \cite{moore1993introduction}. The test statistic is compared to $\alpha$ by computing a \textit{p-value} that is estimated by $\hat{p}=P(T \geq \hat{T} | H_0)$. The p-value is the probability of observing $\hat{T}$ under the null hypothesis.  A p-value < $\alpha$ would be improbable under the null hypothesis, therefore, in this situation it is rejected and the alternative hypothesis is accepted.
 
-Given the binary outcome of a two-sample test, it is clear the hypothesis test can fail in the two following ways. The first is rejecting the null hypothesis when it is correct. This is known as a false positive or a type-I error and is upper-bounded by the chosen significance level, $ \alpha$. It is equivalent to following conditional probability: $\mathbb{P}(\text{reject } H_0 | H_0 \text{ is true})$. The second possible source of error is  a false negative or type-II error . The probability of committing a type-II error is denoted as $\beta=\mathbb{P}\left(\text {accept } H_{0} | H_{0} \text { is false}\right)\). The quantity $1-\beta$ is referred to as the \textit{power} of a test. Maximizing test power is an important part of designing new algorithms and is typically used to compare different methods. 
+Given the binary outcome of a two-sample test, it is clear the hypothesis test can fail in the two following ways. The first is rejecting the null hypothesis when it is correct. This is known as a false positive or a type-I error and is upper-bounded by the chosen significance level, $ \alpha$. It is equivalent to following conditional probability: $\mathbb{P}(\text{reject } H_0 | H_0 \text{ is true})$. The second possible source of error is  a false negative or type-II error. The probability of committing a type-II error is denoted as $\beta=\mathbb{P}\left(\text {accept } H_{0} | H_{0} \text { is false}\right)\). The quantity $1-\beta$ is referred to as the \textit{power} of a test. Maximizing test power is an important part of designing new algorithms and is typically used to compare different methods. 
 
 Often there is a trade-off between type-I and type-II errors and the practitioner must decide how to balance the two given their domain-specific knowledge of the problem. In some cases, it may be desirable to sacrifice one for the other. For example, in the medical field \cite{lieberman2009type}, a false positive diagnosis (type-I error) may be more desirable than missing a diagnosis (type-II error) which would result in never giving treatment to a patient. 
 
@@ -108,6 +108,7 @@ number of true positives plus the number of false negatives. F1-Score is best wh
 \fi
 
 \section{Classic Algorithms}
+\label{classic_algo}
 Presented below are the fundamental approaches to online change point detection that have been very influential on modern approaches. Many modern algorithms are variants of the classic algorithms discussed below. In the following sections let $X_t$ be defined as it is in \ref{probFormulation}.
 
 \subsection{Shewart Control Chart}
