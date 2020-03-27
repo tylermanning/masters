@@ -1,29 +1,27 @@
 \chapter{Kernel Change Point Detection}
-In this chapter, we focus on the class of change point models that leverage kernel techniques, known as \textit{kernel change point detection}. All methods used in the experiments section make use of the maximum mean discrepancy (MMD) for their change point test statistic, therefore, a short review of the MMD statistic is presented first. For an extensive review of kernel embeddings and their applications see \cite{muandet2017kernel} .
+In this chapter, we focus on the class of change point models that leverage kernel techniques, known as \textit{kernel change point detection}. All methods used in the experiments section make use of the maximum mean discrepancy (MMD) for their change point test statistic, therefore, a short review of the MMD statistic is presented first. For an extensive review of kernel embeddings and their applications see \cite{muandet2017kernel}.
 
 \section{Maximum Mean Discrepancy}
 \label{mmd}
-Recall we are looking for a suitable statistic to solve the change point hypothesis test presented in \ref{formula_cpd}. The idea behind MMD is rather than comparing the expected value of $P$ and $Q$ in their original feature space, why not compare their expected value in a different feature space that makes discerning between $P$ and $Q$ more effective.  Doing so would allow the detection of differences between $P$ and $Q$ that were not possible before. A classic technique for comparing samples in a different feature space is through the use of kernel functions. Therefore, we'll start with a brief definition of kernel functions.
+Recall we are looking for a suitable statistic to solve the change point hypothesis test presented in \ref{formula_cpd}. The idea behind MMD is the following: rather than comparing the expected value of $P$ and $Q$ in their original feature space, why not compare their expected value in a different feature space that makes discerning between $P$ and $Q$ more effective. Doing so would allow the detection of differences between $P$ and $Q$ that were not possible before. A classic technique for comparing samples in a different feature space is through the use of kernel functions. Therefore, we'll start with a brief definition of kernel functions.
 
-A positive definite function $k: \mathcal{X} \times \mathcal{X} \rightarrow \mathbb{R}$ is called a \textit{kernel} if there exists a Hilbert space $ \mathcal{H}$ with corresponding map $\phi: \mathcal{X} \rightarrow \mathcal{H}$. From \cite{scholkopf2002learning}, a kernel is defined as,
+Suppose we have a non-empty set  $\mathcal{X}$ for which $x,y \in \mathcal{X}$. A positive definite function $k: \mathcal{X} \times \mathcal{X} \rightarrow \mathbb{R}$ is called a \textit{kernel} if there exists a Hilbert space $ \mathcal{H}$ with corresponding map $\phi: \mathcal{X} \rightarrow \mathcal{H}$. From \cite{scholkopf2002learning}, a kernel is defined as,
 \begin{equation}
 \label{kernel}
 k(x,y) = \left\langle \phi(x), \phi(y) \right\rangle_\mathcal{H}
 \end{equation}
-where $\left\langle \cdot, \cdot \right\rangle_\mathcal{H}$ is the \textit{inner product} in $ \mathcal{H}$. Detailed properties of Hilbert spaces and inner product spaces can be found in \cite{young1988introduction} as they will not be discussed in this thesis.  It can be shown that for a positive definite kernel function, there exists a unique \textit{reproducing kernel Hilbert space} (RKHS) for which $k$ is a reproducing kernel. Again the proofs for these statements are out of scope of this thesis but can be found in XXX. The usefulness of these properties lies in the fact that an inner product in $ \mathcal{H}$ can be computed implicitly through a well-defined kernel function.
+where $\left\langle \cdot, \cdot \right\rangle_\mathcal{H}$ is the \textit{inner product} in $ \mathcal{H}$. Detailed properties of Hilbert spaces and inner product spaces can be found in \cite{young1988introduction}.  It can be shown that for a positive definite kernel function, there exists a unique \textit{reproducing kernel Hilbert space} (RKHS) for which $k$ is a reproducing kernel. Proofs for these statements are out of scope of this thesis but can be found in\cite{scholkopf2002learning}. The usefulness of these properties lies in the fact that an inner product in $ \mathcal{H}$ can be computed implicitly through a well-defined kernel function.
 
-Using \ref{kernel}, a $kernel\text{ }matrix$ or $Gram\text{ }matrix$ can defined as:
-\begin{equation}
-K_{ij} := k(x_i, x_j)
-\end{equation}
+%Using \ref{kernel}, a $kernel\text{ }matrix$ or $Gram\text{ }matrix$ can defined as:
+%\begin{equation}
+%K_{ij} := k(x_i, x_j)
+%\end{equation}
 
-%If the kernel function is \textit{positive-definite} then it is symmetric by definition of the inner product. 
+While this new feature space representation is helpful, it is not necessarily unique. This a problem because $P$ and $Q$ may mapped into a space where they are similar when in fact they are not. Consequently, we need to ensure the kernel mapping is \textit{injective}, i.e. that the mapping from $\mathcal{X}$ to  $\mathcal{H}$ is one to one. See 2.1.1 of \cite{atkinson2005theoretical} for more details on injective functions.
 
-While this new feature space representation is helpful, it is not necessarily unique. This a problem because $P$ and $Q$ may mapped into a space where they are similar when in fact they are not. Consequently, we need to ensure the kernel mapping is \textit{injective}. 
+To ensure the kernel mapping is injective, we can make use of a special class of kernel functions known as \textit{characteristic kernels} that are introduced in \cite{fukumizu2008kernel} and \cite{sriperumbudur2011universality}. The papers show that if $k$ is characteristic then the mapping of $\phi$ into the $\mathcal{H}$ is unique. This means if a characteristic kernel is used, then $X$ and $Y$ can be uniquely mapped to another feature space where the expected value in $\mathcal{H}$ is also unique.  By combining the previous properties of kernel functions, we can now understand where the idea of the maximum mean discrepancy comes from. Rather than comparing the expected values of a moment in the original feature space like we did in 2.1, we will compare the expected values in this new feature space.
 
-In \cite{fukumizu2008kernel} and \cite{sriperumbudur2011universality}, a special class of kernel functions known as \textit{characteristic kernels} was introduced. The papers show that if $k$ is characteristic then the mapping of $\phi$ into the RKHS is unique. By combining the previous properties of kernel functions, we can now understand where the idea of the maximum mean discrepancy comes from. Through the kernel trick, $X$ and $Y$ are uniquely mapped to another feature space where the expected value of each is compared in this new feature space. 
-
-Suppose $n$ samples from a set $X = \{x_1, x_2, ..., x_n\}$ and $m$ samples from a different set $Y=\{y_1, y_2, ..., y_m\}$ are derived from a metric space $\mathcal{X}$. Assume both are distributed as $X \sim  P$ and $Y \sim Q$ respectively. In \cite{smola2007hilbert}, the formal definition of the maximum mean discrepancy (MMD) is defined as:
+More formally, suppose $n$ samples from a set $X = \{x_1, x_2, ..., x_n\}$ and $m$ samples from a different set $Y=\{y_1, y_2, ..., y_m\}$ are derived from $\mathcal{X}$. Assume both are distributed as $X \sim  P$ and $Y \sim Q$ respectively. Using $\phi$ as it is described in \ref{kernel}, the maximum mean discrepancy (MMD) is defined in \cite{smola2007hilbert} as:
 \begin{equation}
 \label{mmd_theory}
 \text{MMD}(P,Q)=|| \underset{X \sim P}{\mathbb{E}}[\phi(X)] -  \underset{Y \sim Q}{\mathbb{E}}[\phi(Y)]||_\mathcal{H},
@@ -75,7 +73,7 @@ where $\sigma > 0$ and is called the \textit{kernel bandwidth}. In \cite{gretton
 \sigma^2=\text{median}\{||x_i-x_j||:i,j = 1,...,n \},
 \end{equation}
 
-which is the median of distances between all pairs of points. This heuristic was first used in XXXX and subsequently became the default setting in many applications. In \cite{garreau2017large}, a large sample analysis of the median heuristic was done that showed normal convergence of . However, it has been shown to be sub-optimal in high-dimensional and small-sample cases as shown in \cite{muandet2014kernel} and \cite{ramdas2015decreasing}. 
+which is the median of distances between all pairs of points. It is not clear where this heuristic was first introduced although many papers incorrectly cite \cite{scholkopf2002learning}. Despite its unknown origins, it has been shown to be empirically suitable for many kernel applications. In \cite{garreau2017large}, a large sample analysis of the median heuristic was done to expand what little theoretical understanding there is of it. However, it has been shown to be sub-optimal in high-dimensional and small-sample cases as shown in \cite{muandet2014kernel} and \cite{ramdas2015decreasing}. 
 
 
 %One such family of statistical distances is the group of \textit{integral probability metrics}, first described in \cite{muller1997integral}. The basic setup of these metrics is consider a space of functions, $\mathcal{F}$, where every function $f \in \mathcal{F}$ is a mapping such that $f : \mathcal{X}  \rightarrow \mathbb{R}$. An IPM between $P$ and $Q$ 
