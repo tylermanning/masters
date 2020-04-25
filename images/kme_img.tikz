@@ -1,0 +1,56 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (1) at (-6, 3.75) {};
+		\node [style=none] (2) at (-6, 0) {};
+		\node [style=none] (3) at (-1, 0) {};
+		\node [style=none] (4) at (-6, 0) {};
+		\node [style=none] (5) at (-1.5, 0) {};
+		\node [style=none] (6) at (-3.5, 3) {$P(X)$};
+		\node [style=none] (7) at (3.5, 0.25) {};
+		\node [style=none] (8) at (1.75, 2) {};
+		\node [style=none] (9) at (2.25, 3.75) {};
+		\node [style=none] (10) at (4, 4.5) {};
+		\node [style=none] (11) at (6, 3.25) {};
+		\node [style=none] (12) at (6, 1) {};
+		\node [style=none] (13) at (5.5, -0.25) {Feature Space};
+		\node [style=red node] (14) at (3, 2.75) {};
+		\node [style=red node] (15) at (3.25, 2) {};
+		\node [style=none] (16) at (-4.5, -0.25) {$x_i$};
+		\node [style=none] (17) at (5.25, 3.25) {$\mu_X$};
+		\node [style=none] (18) at (5.5, 2.5) {$\hat{\mu}_X$};
+		\node [style=small blue] (20) at (3.75, 1.75) {};
+		\node [style=small blue] (21) at (3.25, 1.5) {};
+		\node [style=small blue] (22) at (2.75, 2) {};
+		\node [style=small blue] (23) at (4.75, 0.5) {};
+		\node [style=small blue] (24) at (5.5, 1.5) {};
+		\node [style=small blue] (25) at (3.25, 0.75) {};
+		\node [style=small blue] (26) at (3, 3.25) {};
+		\node [style=small blue] (27) at (3.5, 3.25) {};
+		\node [style=small blue] (28) at (3.5, 2.5) {};
+		\node [style=small blue] (29) at (4, 2.25) {};
+		\node [style=small blue] (30) at (2.5, 2.5) {};
+		\node [style=small blue] (31) at (3.25, 3.75) {};
+		\node [style=small blue] (32) at (4.5, 3.5) {};
+		\node [style=small blue] (33) at (3, 2.25) {};
+		\node [style=small blue] (34) at (2.5, 3) {};
+		\node [style=small blue] (35) at (4.25, 1.75) {};
+		\node [style=none] (36) at (0, -1.25) {$\phi$($x_i$)};
+		\node [style=none] (37) at (-4, -0.25) {};
+		\node [style=none] (38) at (-0.75, 0) {$X$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=black pointer] (2.center) to (3.center);
+		\draw [style=black pointer] (2.center) to (1.center);
+		\draw [in=105, out=30, looseness=2.75] (4.center) to (5.center);
+		\draw [bend right, looseness=1.50] (8.center) to (7.center);
+		\draw [bend right=45, looseness=1.25] (7.center) to (12.center);
+		\draw [bend right=45, looseness=1.50] (12.center) to (11.center);
+		\draw [bend left=45, looseness=1.75] (8.center) to (9.center);
+		\draw [bend left, looseness=1.50] (9.center) to (10.center);
+		\draw [bend left=45, looseness=1.25] (10.center) to (11.center);
+		\draw [style=black pointer] (17.center) to (14);
+		\draw [style=black pointer] (18.center) to (15);
+		\draw [style=dashed edge, bend left, looseness=0.75] (6.center) to (14);
+		\draw [style=dashed edge, bend right] (37.center) to (25);
+	\end{pgfonlayer}
+\end{tikzpicture}

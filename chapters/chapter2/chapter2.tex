@@ -122,6 +122,7 @@ where $\kappa \in \mathbb{R}$ is a constant that controls how sensitive the algo
 Tuning the hyper-parameters can drastically change the performance of the algorithm. The parameter $\kappa$ is used to control the trade-off between false alarms and missed detections. Choosing a lower $\kappa$ makes the control chart detect change points more often and, consequently, increases the false alarms. Whereas a higher $\kappa$ results in less false detections but also more missed detections. The chosen sample size, $N$, is also critical and its effect on the performance of Shewart control charts is studied in \cite{haridy2017effect}.
 
 \subsection{CUSUM}
+\label{cusum}
 Similar to the Shewart control chart, the CUSUM algorithm tracks a statistic over time relative to a predetermined threshold \cite{page1954continuous}. CUSUM is best applied to a process that is already under control. It can be thought of accumulating the information of current and past samples. 
 
 The algorithm is defined by a statistic, $S_t \in \mathbb{R}$, that is recursively updated after each sample, $X_t$, is observed, such that:
