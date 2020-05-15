@@ -141,6 +141,7 @@ Several extensions to the CUSUM algorithm have been proposed such as the filtere
 Finally, since CUSUM is typically better at detecting small shifts in signals and the Shewart control chart is faster at detecting larger changes, the two can be combined \cite{lucas1982combined}. The combined Shewart-CUSUM algorithm leverages the strengths of both techniques for better overall performance. See  \cite{yashchin1985analysis} and \cite{westgard1977combined} for more details. 
 
 \subsection{EWMA}
+\label{ewma}
 First described in \cite{roberts1959control} as a \textit{geometric average}, the exponentially weighted moving average (EWMA) is a type of moving average that applies exponential weighting to time series samples. Initially used as a forecasting technique in the econometrics field for smoothing noisy functions, the EWMA can also be used for determining out of control processes as shown in \cite{hunter1986exponentially}. Rather than weighing all observations uniformly like the standard CUSUM algorithm or a simple moving average, a decay factor (also called a  forgetting factor), $\lambda \in [0,1]$, is used to control how much weight is distributed over the previous observations. As each new observation arrives, the EWMA statistic, $E_t \in \mathbb{R}$, is recursively updated and compared to a threshold. If the EWMA statistic exceeds the threshold then the process is deemed out of control or, in other words, a change point is detected.
 
 The EWMA statistic is calculated as follows at each time step, $t$:
