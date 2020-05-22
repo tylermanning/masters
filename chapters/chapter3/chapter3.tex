@@ -125,22 +125,18 @@ This estimation of the squared MMD is computed in $\mathcal{O}(m)$, which is sig
 Now that we have a suitable metric for computing a test statistic between samples $X$ and $Y$, a hypothesis test can be constructed using the MMD statistic as shown in \cite{gretton2012kernel}. Similar to previous hypothesis tests, a threshold and kernel function is chosen to adequately balance between type-I and type-II error. The null hypothesis is that $X$ and $Y$ are equivalent in their kernel mean elements.  If the MMD is greater than the threshold, then the null hypothesis is rejected and the alternative hypothesis is accepted. In this case, the alternative hypothesis would indicate $X$ and $Y$ differ in one  or more of their statistical moments.
 
 \subsection{Choice of Kernel}
-Notice we have not yet explicitly chosen a kernel function for calculating the MMD statistic. Choosing the proper kernel is often done on a per case basis. Overall optimal kernel selection is a difficult problem that is still actively researched \cite{fukumizu2009kernel} \cite{gretton2012optimal}. We will only discuss one kernel function in this thesis, the Gaussian kernel. The Gaussian kernel is the most widely used kernel and it is the only kernel used in the kernel change point detection methods discussed in section \ref{related_works}.  For other possible choices of kernel functions see table 3.1 in \cite{muandet2017kernel}.
+Notice we have not yet explicitly chosen a kernel function for calculating the MMD statistic. Choosing an appropriate kernel is often done on a per case basis based on the type of application. Additionally, optimal kernel selection is a difficult problem that is still actively researched \cite{fukumizu2009kernel} \cite{gretton2012optimal}. We will only discuss one kernel function in this thesis, the Gaussian kernel. The Gaussian kernel is the most widely used kernel and it is the only kernel used in the kernel change point detection methods discussed in section \ref{related_works}.  For other possible choices of kernel functions see table 3.1 in \cite{muandet2017kernel}.
 
 Given two $d$ dimensional real vectors $x, y \in \mathbb{R}^d$, the Gaussian kernel is defined as:
 \begin{equation}
 k(x, y)= e^{-\frac{1}{2\sigma^2}||x-y||^2}
 \end{equation}
-where $\sigma > 0$ and is called the \textit{kernel bandwidth}. In \cite{gretton2005kernel}, the authors recommend selecting the bandwidth based on the \textit{median heuristic}, which computes $\sigma$ according to, 
+where $\sigma > 0$ and is called the \textit{kernel bandwidth}. In \cite{gretton2005kernel}, the authors recommend selecting the bandwidth based on the \textit{median heuristic} using a sample of the data. The median is computed on the set of pairwise distances between all data points in the sample. Therefore, $\sigma$ is computed by, 
 \begin{equation}
-\sigma=\text{median}\{||x_i-x_j||:i,j = 1,...,n \},
+\sigma=\text{median}\{||x_i-x_j||:i,j = 1,...,n \}.
 \end{equation}
 
-which is the median of the pairwise distances between data points. It is not clear where this heuristic was first introduced although many papers incorrectly cite \cite{scholkopf2002learning}. Despite its unknown origins, it has been shown to be empirically suitable for many kernel applications. In \cite{garreau2017large}, a large sample analysis of the median heuristic was done to expand what little theoretical understanding there is of it. However, it has been shown to be sub-optimal in high-dimensional and small-sample cases as shown in \cite{muandet2014kernel} and \cite{ramdas2015decreasing}. 
-
-It seems as long as the bandwidth is chosen $\mathcal{O(\sqrt{d})}$ then test power is independent of the bandwidth. It is interesting to note such a critical hyperparameter for performance is tuned heuristically. 
-
-Despite this, the median heuristic remains extremely useful for selecting the bandwidth hyperparameter. It is noteworthy then to see how online change point models tune median heuristic. In the context of an infinite data stream, you can simply run and expanding median on all incoming data that infinitely grows. But is this ideal? This would require storing all the observations you ever observe which is obviously intractable. Alternatively, you can set it using some initial training data but again how long is an initial bandwidth valid in a continuous data stream? To our knowledge, these questions have not been addressed anywhere in the kernel change point detection literature, which is why the topic successive median calculation is a focus in section \ref{our_approach}.
+It is not clear where this heuristic was first introduced although many papers incorrectly cite the 2002 textbook, \textit{Learning with kernels: support vector machines, regularization, optimization, and beyond} by Sch{\"o}lkopf, Smola, Bach et al \cite{garreau2017large}. Despite its unknown origins, it has been shown to be empirically suitable for many kernel applications. It seems as long as the bandwidth is chosen $\mathcal{O}(\sqrt{d})$, which the median heuristic often achieves, then test power is independent of the bandwidth. However, it has been shown to be sub-optimal in cases with very high-dimensions \cite{muandet2014kernel} or small sample size\cite{ramdas2015decreasing}. Because the median heuristic is critical to overall performance of the kernel two-sample test using the MMD, its online implementation will be explored in greater detail in section \ref{our_approach}.
  
 \section{Related Work}
 \label{related_works}
@@ -191,13 +187,16 @@ Finally, in a recent, preprint paper \cite{flynn2019change}, a kernel CUSUM (KCU
 
 Besides its speed of computation, an additional benefit of MMD$_l$ is that it is normally distributed under the null distribution unlike the quadratic-time estimate. This facilitates analysis and provides statistical guarantees for worst-case detection delays and the expected time to false alarm. While this non-parametric approach can detect any change in the distribution of a sequence, it does struggle with more complicated distributional changes such as variance changes of a single dimension and changes beyond first and second-order moments. It was also not benchmarked against other kernel methods, which we cover in this thesis for completeness.
 
+Given how useful for selecting the bandwidth hyperparameter, it is noteworthy then to see how the above online change point models tune median heuristic. In the context of an infinite data stream, most methods simply take a small initial sample and use that to set the bandwidth once at the beginning and never change it again. you can simply run and expanding median on all incoming data that infinitely grows. But is this ideal? This would require storing all the observations you ever observe which is obviously intractable. Alternatively, you can set it using some initial training data but again how long is an initial bandwidth valid in a continuous data stream? To our knowledge, these questions have not been addressed anywhere in the kernel change point detection literature, which is why the topic successive median calculation is a focus in section \ref{our_approach}.
+
 %In 2016, James et al. \cite{james2016leveraging} proposed using energy statistics to test the significance of a change point that is robust to anomalies. They point out that their work is the first to accurately detect change points with fast time to detection while not being affected by extreme outliers that are not change points. They compare their E-divisive with medians algorithm to the parametric PELT technique. 
 
 \section{Our Approach}
 \label{our_approach}
 
-As stated in the related work, all kernel change point detection methods that use a Gaussian kernel use the median heuristic to determine the bandwidth. While this method has proved to be sufficient for most applications, it has not been thoroughly tested against alternative bandwidth selection procedures. This is ironic given how much impact the choice of bandwidth can have. We present a natural alternative for calculating the median heuristic in real-time for online change point detection. This method is largely based on the \texttt{Binapprox} algorithm from \cite{tibshirani2008fast} that is shown below. 
+As stated in the related work, all kernel change point detection methods that use a Gaussian kernel use the median heuristic to determine the bandwidth. While this method has proved to be sufficient for most applications, it has not been thoroughly tested against any alternative bandwidth selection procedures. This is ironic given how much impact the choice of bandwidth can have on performance. We present a natural alternative for calculating the median heuristic in real-time for online change point detection. This method is largely based on the \texttt{Binapprox} algorithm from \cite{tibshirani2008fast} that is shown below. 
 
+%https://tex.stackexchange.com/questions/142313/how-to-see-the-steps-number-in-an-algorithm
 \begin{algorithm}[H]
 \SetAlgoLined
 \KwIn{$x_i,..,x_n, B$}
@@ -205,18 +204,8 @@ As stated in the related work, all kernel change point detection methods that us
 Calculate $\bar{x}$ and $s_x$\\
 Form $B$ bins across $[\bar{x} - s_x, \bar{x} + s_x]$\\
 Map $x_i,..,x_n$ to bins\\
- \For{While condition}{
-  instructions\;
-  \eIf{condition}{
-   instructions1\;
-   instructions2\;
-      \[
-        n(i) = \frac{a}{b(i)\sqrt{3v}}
-      \]
-   }{
-   Return the midpoint of bin b\;
-  }
- }
+Find the bin $b$ that contains the median\\
+Return the midpoint of bin b\\
  \caption{Binapprox algorithm}
 \end{algorithm}
 
@@ -229,7 +218,7 @@ the approximation could be significantly different from the actual median. To co
 Naturally, this fits in exactly to what we want to accomplish with online change point detection. We have incoming data that we want to roll into the calculation of the median heuristic but we also want a fast way to update the median while being accurate. The \texttt{Binapprox} algorithm checks all of these boxes and is simple to incorporate into any online change point detection work flow. 
 
 \section{Experiment Setup}
-
+\label{experiments}
 \subsection{Initialization}
 An important factor for online change point methods is determining how to initialize the algorithm. Because we are running an unsupervised model for classifying change points, we do not spend time training the model or tuning any of the hyperparameters. This is a double-edged sword because on one hand, we can drop in a change point algorithm onto a data stream let it start running without much configuration. On the other hand, if it does not have any prior distribution to compare to then it will need to be adjusted to know what's an appropriate reference or in-control distribution. This is usually referred to as the initialization phase for online algorithms.
 
@@ -259,33 +248,38 @@ $t^*$, is known. Evaluating performance in this case is the same as evaluating a
 \subsection{Synthetic Datasets}
 A common difficulty in change point detection is evaluating the performance of an algorithm with datasets that aren't overly simplistic and difficult enough to ascertain some real world use.
 
-Unlike fields like image recognition where datasets like MNIST provide a common benchmark, there are no standard datasets that are widely used across the change point detection literature for evaluating new methods. Most papers propose experiments that are relevant for the specific problem they are trying to solve  but lack examples or explanations of when their method would not be applicable.  Furthermore, because change point evolved out of the statistics literature, many papers focus on theoretical results and provide minor experimental results, if any.
+Unlike fields like image recognition where standardized datasets like MNIST provide a common benchmark, there are no standard datasets that are widely used across the change point detection literature for evaluating new methods. Most papers propose experiments that are relevant for the specific problem they are trying to solve  but lack examples or explanations of when their method would not be applicable.  Furthermore, because change point evolved out of the statistics literature, many papers focus on theoretical results and provide minor experimental results, if any.
 
-Given the empirical focus of this thesis, we attempt to put together the most comprehensive experiments using synthetic data. To the best of our knowledge, no change point detection paper covers as many variations as presented in this thesis. While synthetic datasets are idealistic in their formulation, they provide a good starting point for comparing different methods because many variables can be controlled for. Often in the real world, the exact location of change points is not known. Therefore, it is important for the evaluation of a change point detection algorithm that it performs competitively on synthetic data.
+Given the empirical focus of this thesis, we attempt to put together the most comprehensive experiments using synthetic data. To the best of our knowledge, no change point detection paper covers as many variations as presented in this thesis. While synthetic datasets are idealistic in their formulation, they provide a good starting point for comparing different methods because the exact location of the change points can be controlled for. This is a luxury that is often not available with real world datasets, making it difficult to ascertain performance on them. Therefore, to compare several kernel change point detection methods, they will be evaluated across several synthetic datasets.
 
-Inspired by recent papers \cite{chang2019kernel} and \cite{flynn2019change} that attempt to bridge the gap between the statistics and machine-learning literature, the following synthetic datasets are created: change in mean, scaling variance, alternating between a Gaussian distribution and a Gaussian mixture, alternating between Gaussian mixtures, and alternating between Gaussian distribution and Laplace distribution. It is truly hard to properly generalize all the possible situations a non-parametric algorithm may be used in, but the synthetic cases presented in this thesis are common across domains and cover a range of applications.
+Inspired by recent papers \cite{chang2019kernel} and \cite{flynn2019change} that attempt to bridge the gap between the statistics and machine-learning literature, we put together various challenging changes in distribution that may be encountered in a data stream. They are the following: change in mean, scaling variance, alternating between a Gaussian distribution and a Gaussian mixture, alternating between Gaussian mixtures, and alternating between Gaussian distribution and Laplace distribution. It is truly hard to properly generalize all the possible situations a non-parametric algorithm may be used in, but the synthetic cases presented in this thesis cover a range of applications. The following paragraphs describe how each one is constructed in detail.
 
 For a change in mean, a change point is inserted in the time series at some random time where the mean is shifted either positively or negatively. There are two variants to this scenario. In the first, the mean change is in all dimensions simultaneously. In the second variation, the mean change is in only one dimension making it harder to detect. 
 
+For a change in variance, the distribution alternates between a Gaussian with $\mathcal{N}(0,1)$ to a Gaussian where the variance is scaled by a factor of 2 giving $\mathcal{N}(0,2)$.
+
+For a change between Gaussian mixtures, the data stream starts with a Gaussian mixture model XXXX and 
+
 In the last scenario, the time series alternates from a Gaussian with $\mathcal{N}(0,1)$ to a Laplace distribution with zero mean and unit variance. The idea for this scenario is detecting changes when a data stream is consistent in its mean and variance, but not in its later moments.
 
-For each experiment above, a synthetic time series is created with 500 change points that will be fed into the algorithm.  Once the detection statistics are calculated, the evaluation metrics from \ref{eval} are computed. A Monte-Carlo approach is used to estimate false alarm rates and average detection delay at various thresholds.
+For each experiment above, a synthetic time series is created with 500 change points that will be fed into each of the algorithms.  Once the detection statistics are calculated, the evaluation metrics from \ref{eval} are computed at various thresholds. A Monte-Carlo approach is used to estimate false alarm rates and average detection delay at various thresholds. See table \ref{Tab:synthetic} for a summary of each synthetic dataset.
 
-It should be noted this testing setup is nearly identical to the testing procedure used in the NEWMA except we use longer time series with more change points. The other two kernel algorithms, Scan-B and KCUSUM, did not use long time series with several change points but rather a repeated test approach with a single change point.
+It should be noted this testing setup is nearly identical to the testing procedure used in the NEWMA except we use longer time series with more change points and more variations of possible distribution changes. The other two kernel algorithms, Scan-B and KCUSUM, did not use long time series with several change points but rather a repeated test approach with a single change point. 
 
 \begin{center}
 \captionof{table}{Synthetic Datasets Summary}
 \begin{tabular}{SSSSSS} \toprule
     {Type of Change} & {No. of Dimensions} & {Length} & {No. of Changepoints}  \\ \midrule
-    {Mean (all dimensions)}  & 20 & 5000 & 50  \\
-    {Mean (single dimension)}  & 20 & 5000 & 50  \\
-    {Variance}  & 20 & 5000 & 50  \\
-    {Frequency}  & 1 & 5000  & 50  \\
-    {Correlation} & 2 & 5000  & 50  \\
-    {Blobs}  & 10 & 10 000  & 50  \\
-    {GMMs}  & 50 & 10 000  & 50  \\ \bottomrule
+    {Mean (all dimensions)}  & 20 & 5000 & 500  \\
+    {Mean (single dimension)}  & 20 & 5000 & 500  \\
+    {Variance}  & 20 & 5000 & 500  \\
+    {Frequency}  & 1 & 5000  & 500  \\
+    {Blobs}  & 10 & 10 000  & 500  \\
+    {GMMs}  & 50 & 10 000  & 500  \\ 
+    {Normal to Laplace} & 2 & 5000  & 500  \\ \bottomrule
 \end{tabular}
+ \label{Tab:synthetic}
 \end{center}
 
-
+\subsection{Synthetic Results}
 

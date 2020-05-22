@@ -62,23 +62,63 @@ The size of the window, $w$, is an important consideration that is typically cho
 \subsection{Performance Measures}
 %Because of the unsupervised nature of detecting change points, it is difficult to evaluate the performance of change point detection models with real world data. Many papers detail asymptotic or non-asymptotic theoretical bounds of their proposed change point methods.  These theoretical results are typically compared across different change point methods for benchmarking a new algorithm.
 
-Every time the change point hypothesis test in \ref{formula_cpd} is evaluated two main issues arise. The first is detecting a change point when there is no actual change in the observed sequence. These are typically called \textit{false alarms} or false detections in the change point detection literature \cite{lee2010change}. The second issue is not detecting a change point when one occurs, called a \textit{missed detection}. This could be caused by detecting a change point much too late for it to be of any use or simply missing it altogether. In both cases, a running total of false alarms and missed detections is monitored for performance. However, simply counting the number of false alarms or missed detections does not capture the goal of the online change point detection problem, which is to quickly detect change points over time, while minimizing false alarms. 
+An important crux of change point detection is how to evaluate an algorithm. Real life streaming data does not always announce when its distribution has changed even when clearly it has. In some cases, it may be possible to trace a change in variation back to a deterministic machine that is no longer operating as expected, but in other cases this may be impossible. For this reason most past research has focused on theoretical results rather than empirical ones. In the cases where empirical data is used, it is usually generated synthetically. This allows the practitioner to control exactly where the distribution changes and compare a proposed method to ground truth change points. Therefore, the following measures of performance will be presented in the context of synthetic data when all change points are known.
 
-The expected amount of time that must pass before observing a false alarm is defined by a metric known as the \textit{average time to false alarm} (TTFA). It is defined as:
+Suppose we continuously generate synthetic data according to some distribution and some point in time, $t_1^*$, we generate the data from a different distribution. If we repeat this process $K^*$ times then we can let the set of true change points be denoted by $\mathcal{T}^*=\{t_1^*, t_2^*,...,t_{K^*}^*\}$ whose size is $|\mathcal{T}^*| = K^*$. If this particular dataset is fed into an online change point detection algorithm in a streaming fashion then the algorithm can generate an estimated set of change points. Let this set of estimated change points be denoted by $\hat{\mathcal{T}}=\{\hat{t}_1, \hat{t}_2,...,\hat{t}_{\hat{K}}\}$ whose size is $|\hat{\mathcal{T}}| = \hat{K}$. Note, $\hat{K}$ does not necessarily equal $K^*$.
+
+Armed with both sets of change points, we can now assess performance of an algorithm. A change point is considered detected if it occurs within a user-defined margin of error $M>0$. That is, if $\hat{t}$ is detected within $M$ samples of $t^*$ then it is an estimated change point. Therefore, the set of true positives $\operatorname{TP}$ can be written as,
+\begin{equation}
+\operatorname{TP}(\mathcal{T}^*, \hat{\mathcal{T}}) = \{t^* \in \mathcal{T}^* | \exists \hat{t} \in  \hat{\mathcal{T}} \text{ s.t. } 0 < \hat{t} - t^* \leq M\}.
+\end{equation}
+Notice by this definition, an estimated change point occurring just prior to a real one is a missed detection in online detection. This is in stark contrast to an offline case that is more concerned with segmentation a time series and being as close as possible to an actual change point is sufficient. This is unrealistic in the online scenario.
+
+Using the set of true positives, we can use \textit{precision} and \textit{recall} to evaluate the performance. Precision is the proportion of the predicted change points that are true change points. Recall is the proportion of the true change points that are well predicted. This gives:
+
+\noindent
+\begin{tabularx}{\linewidth}{@{}XX@{}}
+\begin{equation}
+\operatorname{PREC}(\mathcal{T}^{*}, \hat{\mathcal{T}})=\frac{|\operatorname{TP}(\mathcal{T}^{*}, \hat{\mathcal{T}})|} {\hat{K}}
+\end{equation}
+&
+\begin{equation}
+\operatorname{REC}(\mathcal{T}^{*}, \hat{\mathcal{T}})=\frac{|\operatorname{TP}(\mathcal{T}^{*}, \hat{\mathcal{T}})|} {K^*}.
+\end{equation}
+\end{tabularx}
+Precision and recall are well-defined between $(0,1)$ if the margin $M$ is smaller than the spacing between two true change points. This is an important consideration that will be useful for experiments conducted in section \ref{experiments}.
+
+If an estimated change point falls outside the margin, then it is deemed a false positive. These are typically called \textit{false alarms} or false detections in the change point detection literature \cite{lee2010change}.
+
+\begin{center} 
+\captionof{figure}[Kernel Mean Embedding]{Stylized depiction of a kernel mean embedding of $P(X)$ to a RKHS as $\mu_X$. The empirical estimate, $\hat{\mu}_X$, is shown to be close in $\mathcal{H}$ to its theoretical counterpart.} 
+\ctikzfig{changepoints}
+\label{fig:changepoints} 
+%\medskip
+%\tiny
+\end{center}
+
+While all the above metrics are useful, they are not sufficient on their own. Suppose we have two online change point methods, one is capable of consistently detecting change points one time-step after an actual change point and the second method is capable of consistently detecting change points 20 time-steps after an actual change point. Assuming the margin of error in this case very large, is there anyway to discern between the two methods using the above evaluation metrics?  The answer is no as long $20 < M$. This is a problem because clearly one method is better at capturing changes in a time series quickly. Simply counting the number of false alarms or missed detections does not capture the goal of the online change point detection problem, which is to quickly detect change points over time, while minimizing false alarms. 
+ 
+%These are typically called \textit{false alarms} or false detections in the change point detection literature \cite{lee2010change}. 
+
+The second issue is not detecting a change point when one occurs, called a \textit{missed detection}. This could be caused by detecting a change point much too late for it to be of any use or simply missing it altogether. 
+In both cases, a running total of false alarms and missed detections is monitored for performance. 
+%However, simply counting the number of false alarms or missed detections does not capture the goal of the online change point detection problem, which is to quickly detect change points over time, while minimizing false alarms. 
+
+In the online change point detection literature, there are two common ways to incorporate the notion of delay when flagging change points. The first is a metric known as the \textit{average time to false alarm} (TTFA) and it is defined as 
+the expected amount of time that must pass before observing a false alarm is raised. It is computed as:
 \begin{equation}
 \label{ttfa}
-\text{TTFA} = \mathbb{E}[\text{ }  \hat{t} \text{ } |\text{ }  t^* \text{ does not exist} ],
+\text{TTFA} = \mathbb{E}[\text{ }  \hat{t} \text{ } |\text{ }  t^* \text{ does not exist} ].
 \end{equation}
-where it is the expected number of observations that are observed before a change point is incorrectly detected. Therefore, a larger value of TTFA is preferable. In the literature it is also referred to average run length (ARL) or average run length under the null (ARL$_0$) \cite{johnson2017detecting}. 
+Clearly, a larger value of TTFA is preferable. In the literature this measure is also referred to average run length (ARL) or average run length under the null (ARL$_0$) \cite{johnson2017detecting}. 
 
-The second method of evaluating the accuracy in the context of online change point detection is the \textit{expected detection delay} (EDD). It is the expected amount of time that passes before a true change point is detected. It is defined as 
+Alternatively, the second method of evaluating the delay of estimated change points is by measuring the average amount of time that passes before a true change point is detected. This is known as \textit{expected detection delay} (EDD) and is defined as 
 \begin{equation}
 \label{edd}
 \text{EDD} = \mathbb{E}[\text{ }  \hat{t} \text{ } |\text{ }  t^* \text{ does exists} ].
 \end{equation}
 
-An online change point detection technique aims to minimize EDD, while maximizing TTFA. Balancing the two is similar to balancing type-I and type-II error discussed in section \ref{hyptesting}, where the practitioner may one to sacrifice one for the other. A lower EDD will necessarily result in a lower TTFA, which is undesirable. 
-
+Both TTFA and EDD are two sides of the same coin. Reducing the EDD also reduces the TTFA, which is good for the former and bad for the latter. The opposite is also true. Increasing TTFA, also increases the EDD. Therefore, minimizing EDD or maximizing TTFA depends entirely on the domain-specific application, where the practitioner may want to sacrifice one for the other. 
 %\begin{equation}
 % \text{Missed Detections = 100*\frac{\text{\# of missed changes}}{total change points}}
 % \end{equation}

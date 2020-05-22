@@ -3,12 +3,11 @@
 % TikZiT, the only non-comment lines must be of the form:
 % \tikzstyle{NAME}=[PROPERTY LIST]
 
-
 % Node styles
 \tikzstyle{none}=[fill=none, tikzit category=nodes, shape=circle, draw=none]
 \tikzstyle{red node}=[fill=red, tikzit category=nodes, shape=circle, draw=black]
-\tikzstyle{small red}=[fill=red,circle,inner sep=0pt,minimum size=7pt, draw=black]
-\tikzstyle{small blue}=[fill,circle,inner sep=0pt,minimum size=2pt]
+\tikzstyle{small red}=[fill=red, circle, inner sep=0pt, minimum size=7pt, draw=black]
+\tikzstyle{small blue}=[fill, circle, inner sep=0pt, minimum size=2pt]
 \tikzstyle{blue node}=[fill=blue, shape=circle, draw=black, tikzit category=nodes]
 \tikzstyle{green node}=[tikzit fill=green, fill=green, shape=circle, draw=black, tikzit category=nodes]
 \tikzstyle{yellow square}=[draw=black, fill=yellow, shape=rectangle]
@@ -17,6 +16,9 @@
 % Edge styles
 \tikzstyle{dashed edge}=[<->, dashed]
 \tikzstyle{dashed edge}=[->, dashed]
+\tikzstyle{dashed}=[-, dashed]
 \tikzstyle{blue pointer}=[->, draw=blue]
 \tikzstyle{black pointer}=[->, draw=black]
 \tikzstyle{black thick}=[-, draw=black, line width=0.25mm]
+\tikzstyle{new edge style 0}=[-]
+\tikzstyle{tyler}=[dashed, -]
