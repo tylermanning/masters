@@ -69,11 +69,11 @@
 		\draw [bend left=45, looseness=1.75] (8.center) to (9.center);
 		\draw [bend left, looseness=1.50] (9.center) to (10.center);
 		\draw [bend left=45, looseness=1.25] (10.center) to (11.center);
-		\draw [style=dashed edge, bend right] (37.center) to (25);
 		\draw [style=black thick, in=105, out=45, looseness=2.00] (39.center) to (41.center);
-		\draw [style=dashed edge, bend left] (6.center) to (60);
 		\draw [style=black pointer] (62.center) to (60);
 		\draw [style=black pointer] (61.center) to (59);
 		\draw [style=black thick, in=105, out=-75, looseness=3.25] (41.center) to (63.center);
+		\draw [style=dashedpointerZ, bend right] (67) to (25);
+		\draw [style=dashedpointerZ, bend left] (6.center) to (60);
 	\end{pgfonlayer}
 \end{tikzpicture}

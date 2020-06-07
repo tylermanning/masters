@@ -1,3 +1,5 @@
 % sample.tikzdefs
 \usepackage{amsmath,amsfonts,amssymb}
+\usetikzlibrary{patterns}
+
 

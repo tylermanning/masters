@@ -14,11 +14,10 @@
 \tikzstyle{blue node 2}=[fill={rgb,255: red,128; green,0; blue,128}, draw=black, shape=circle, tikzit fill=blue]
 
 % Edge styles
-\tikzstyle{dashed edge}=[<->, dashed]
-\tikzstyle{dashed edge}=[->, dashed]
-\tikzstyle{dashed}=[-, dashed]
+\tikzstyle{dasheddoubleZ}=[<->, dashed]
+\tikzstyle{dashedpointerZ}=[->, dashed]
+\tikzstyle{dashedZ}=[-, dashed]
 \tikzstyle{blue pointer}=[->, draw=blue]
 \tikzstyle{black pointer}=[->, draw=black]
 \tikzstyle{black thick}=[-, draw=black, line width=0.25mm]
-\tikzstyle{new edge style 0}=[-]
-\tikzstyle{tyler}=[dashed, -]
+\tikzstyle{dottedZ}=[-, dotted]

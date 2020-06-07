@@ -72,7 +72,19 @@ Armed with both sets of change points, we can now assess performance of an algor
 \end{equation}
 Notice by this definition, an estimated change point occurring just prior to a real one is a missed detection in online detection. This is in stark contrast to an offline case that is more concerned with segmentation a time series and being as close as possible to an actual change point is sufficient. This is unrealistic in the online scenario.
 
-Using the set of true positives, we can use \textit{precision} and \textit{recall} to evaluate the performance. Precision is the proportion of the predicted change points that are true change points. Recall is the proportion of the true change points that are well predicted. This gives:
+If an estimated change point falls outside the margin, then it is deemed a false positive. These are typically called \textit{false alarms} or false detections in the change point detection literature \cite{lee2010change}. The set of false alarms can be written as:
+\begin{equation}
+\operatorname{FA}(\mathcal{T}^*, \hat{\mathcal{T}}) = \{\hat{t} \in  \hat{\mathcal{T}} | \nexists t^* \in \mathcal{T}^* \text{ s.t. } 0 < \hat{t} - t^* \leq M\}.
+\end{equation}
+
+Missed change points are referred to as missed detections and they occur when no estimated change point is flagged following an actual change point. This is equivalent to a false negative in machine learning classification. Therefore the set of missed detections are:
+\begin{equation}
+\operatorname{MD}(\mathcal{T}^*) = \{t^* \in \mathcal{T}^*  \text{ s.t. } t^* \notin \operatorname{TP} \}.
+\end{equation}
+
+In figure \ref{fig:changepoints}, the relationship between true positives, false alarms and missed detections is shown.
+
+Using the set of true positives, we can also use \textit{precision} and \textit{recall} to evaluate the performance. Precision is the proportion of the predicted change points that are true change points. Recall is the proportion of the true change points that are well predicted. This gives:
 
 \noindent
 \begin{tabularx}{\linewidth}{@{}XX@{}}
@@ -86,10 +98,8 @@ Using the set of true positives, we can use \textit{precision} and \textit{recal
 \end{tabularx}
 Precision and recall are well-defined between $(0,1)$ if the margin $M$ is smaller than the spacing between two true change points. This is an important consideration that will be useful for experiments conducted in section \ref{experiments}.
 
-If an estimated change point falls outside the margin, then it is deemed a false positive. These are typically called \textit{false alarms} or false detections in the change point detection literature \cite{lee2010change}.
-
 \begin{center} 
-\captionof{figure}[Kernel Mean Embedding]{Stylized depiction of a kernel mean embedding of $P(X)$ to a RKHS as $\mu_X$. The empirical estimate, $\hat{\mu}_X$, is shown to be close in $\mathcal{H}$ to its theoretical counterpart.} 
+\captionof{figure}[Change Point Classification Example ]{An example of actual change points $t_1^*, t_2^*, t_3^*$ and estimated change points ${\hat{t}_1, \hat{t}_2, \hat{t}_3}$. The first two estimated change points in green are true positives as they are detected within the margin $M$.  The third estimated change point in red is not within the margin making it a false alarm. Finally the last actual change point does not have any estimated change points after it making it a missed detection.} 
 \ctikzfig{changepoints}
 \label{fig:changepoints} 
 %\medskip
@@ -117,6 +127,11 @@ Alternatively, the second method of evaluating the delay of estimated change poi
 \label{edd}
 \text{EDD} = \mathbb{E}[\text{ }  \hat{t} \text{ } |\text{ }  t^* \text{ does exists} ].
 \end{equation}
+
+Because we will use EDD to assess performance in later chapters, it can be estimated by:
+\begin{equation}
+\widehat{\text{EDD}} = \sum_{i=1}^{|\operatorname{TP}|} \sum_{j=1}^{\hat{K}} \frac{\hat{t}_j - t_i^*}{|\operatorname{TP}|} \quad \quad \forall t^* \in \operatorname{TP}, \forall \hat{t} \in \hat{\mathcal{T}} \text{ s.t. }
+\end{equation} 
 
 Both TTFA and EDD are two sides of the same coin. Reducing the EDD also reduces the TTFA, which is good for the former and bad for the latter. The opposite is also true. Increasing TTFA, also increases the EDD. Therefore, minimizing EDD or maximizing TTFA depends entirely on the domain-specific application, where the practitioner may want to sacrifice one for the other. 
 %\begin{equation}
