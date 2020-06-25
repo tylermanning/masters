@@ -12,6 +12,7 @@
 \tikzstyle{green node}=[tikzit fill=green, fill=green, shape=circle, draw=black, tikzit category=nodes]
 \tikzstyle{yellow square}=[draw=black, fill=yellow, shape=rectangle]
 \tikzstyle{blue node 2}=[fill={rgb,255: red,128; green,0; blue,128}, draw=black, shape=circle, tikzit fill=blue]
+\tikzstyle{Box}=[fill=violet, draw=black, shape=rectangle, minimum width=0.75cm, minimum height=1cm, opacity=0.5]
 
 % Edge styles
 \tikzstyle{dasheddoubleZ}=[<->, dashed]

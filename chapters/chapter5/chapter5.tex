@@ -1,10 +1,8 @@
 \chapter{Application to Market Liquidity}
-
-In finance, \textit{market liquidity} describes how quickly a market participant may buy or sell an asset without causing significant fluctuations in the price. In liquid markets, there is minimal impact to the price by quickly buying (selling) it. In illiquid markets, a purchase (sale) of the asset will cause the price to rise (fall) resulting in adverse price selection if the buyer (seller) is making a large transaction. In both cases, market liquidity is in constant fluctuation. It is this fluctuation that is the focus of this thesis. 
-By detecting changes in market liquidity a market participant can identify periods of when trading may be more or less favourable. For example, an institutional investor wishing to unwind a large position over the course of several days may want to quickly detect rapid changes in a liquidity that could negatively impact their execution strategy. The following description of the limit order book is based on the notation used in \cite{gould2016queue}. 
+In finance, \textit{market liquidity} describes how quickly a market participant may buy or sell an asset without causing significant fluctuations in the price. In liquid markets, there is minimal impact to the price by quickly buying (selling) it. In illiquid markets, a purchase (sale) of the asset will cause the price to rise (fall) resulting in adverse price selection if the buyer (seller) is making a large transaction. In both cases, market liquidity is in constant fluctuation. By detecting changes in market liquidity a market participant can identify periods of when trading may be more or less favourable. For example, an institutional investor wishing to unwind a large position over the course of several days may want to quickly detect rapid changes in a liquidity that could negatively impact their execution strategy. Framing liquidity changes over time as an online change point detection problem is the focus of this chapter. We begin with a description of the limit order book is based on the notation used in \cite{gould2016queue}. 
 
 \section{Properties of the Limit Order Book}
-All modern financial markets are set-up as a double-sided auction between buyers (bid side) and the sellers (ask side) called limit order books (LOBs). A market participant may post orders at specific prices on either side of the book. A limit order, denoted by $x$, is defined as a tuple containing a price, $p_x$, and a size, $w_x$ where $|w_x|>0$:
+Many modern financial markets are set-up as an electronic double-sided auction between buyers (bid side) and the sellers (ask side) called \textit{limit order books} (LOBs). A market participant may post orders at specific prices on either side of the book. A limit order, denoted by $x$, is defined as a tuple containing a price, $p_x$, and a size, $w_x$ where $|w_x|>0$:
 
 \begin{equation}
 x = \langle p_x, w_x \rangle.
@@ -49,9 +47,15 @@ Every LOB has two configuration parameters: the tick size, $\pi >0$, which is th
 
 There are two possible distributional changes that are of interest. The first is how the entire distribution of liquidity changes over time. These changes are often associated with events happening in the market such as the start of U.S. trading hours, the release of economic data or a planned speech by the head of the federal reserve. There may also be unplanned events that affect the overall liquidity in the book such as a the 9/11 terrorist attack or a virus outbreak like the Corona virus.
 
-\input{images/book.tikz}
+\begin{center} 
+\captionof{figure}[Change in Limit Order Book Liquidity]{The limit order book's liquidity drastically changes from (\textbf{left}) significant liquidity at time $t_1$ to (\textbf{right}) very little liquidity at time $t_2$.} 
+\ctikzfig{book_drawdown}
+\label{fig:book_img} 
+%\medskip
+%\tiny
+\end{center}
 
-The second is how the distribution of the bid orders differs from the distribution of the ask orders. Typically, the distribution of liquidity on each side of the book is more or less symmetric. However, there have been studies that have shown times when there is an asymmetry between the two sides. This asymmetry has been shown to correlate to price changes. 
+The second is how the distribution of the bid orders differs from the distribution of the ask orders. Typically, the distribution of liquidity on each side of the book is more or less symmetric. However, there have been studies that have shown times when there is an asymmetry between the two sides. This asymmetry has been shown to correlate to price changes \cite{gould2016queue}. This is equivalent to looking for changes in book imbalance.
 
 
 \section{Dataset Construction}
@@ -63,18 +67,30 @@ The futures that will be used in our dataset are based on a combination of selec
 \begin{center}
 \captionof{table}{Summary of Futures Studied}
 \begin{tabular}{SSSSSS} \toprule
-    {Name} & {Asset Class} & {CME Symbol} & {Tick Size} & {Other}  \\ \midrule
-    {E-mini S\&P 500}  & {Equity} & {ES} & 0.25 & 1.402  \\
-    {10 Year T-Notes}  & {Fixed Income}  & {ZN} & 3.442  & 0.299  \\
-    {Crude Oil}  & {Commodity}  & {CL} & 3.442  & 0.299  \\
-    {Gold} & {Commodity}  & {GC} & 3.442  & 0.299  \\
-    {Euro FX}  & {Currency}  & {6E} & 3.442  & 0.299  \\ \bottomrule
+    {Name} & {Asset Class} & {CME Symbol} & {Tick Size (\$)}\\ \midrule
+    {E-mini S\&P 500}  & {Equity} & {ES} & 12.5  \\
+    {10 Year T-Notes}  & {Fixed Income}  & {ZN} & 15.625   \\
+    {Crude Oil}  & {Commodity}  & {CL} & 10    \\
+    {Gold} & {Commodity}  & {GC} & 10   \\
+    {Euro FX}  & {FX Currency}  & {6E} & 6.25  \\ \bottomrule
 \label{futures}
 \end{tabular}
 \end{center}
 
-For each future contract in table \ref{futures}, the state of the order book is sampled every \hl{60 seconds} from 7 AM to 4 PM EST for a period of \hl{45} days. The characteristics of the order book that are sampled at every time step, $t_I$, are:
-1) Quantity, $q$, at the top $N$ levels of the book, $q_1 ... q_N$ 
-2) Spread, $s: [0, \mathbb{Z}^+]$, normalized by tick size, where spread of zero indicates there is no spread.
+For each future contract in table \ref{futures}, the state of the order book is sampled every $10$ seconds from 7 AM to 4 PM EST between January 6, 2020 and April 22, 2020 for a total of 75 business days (excluding American holidays). The variables that are sampled at every time step are:
+\begin{itemize}
+\item Quantity at the top $N$ levels of the book, $q_1 ... q_N$ where $q: [0, \mathbb{Z}^+]$, 
+\item Spread normalized by tick size, where spread of zero indicates there is no spread and $s: [0, \mathbb{Z}^+]$, 
+\end{itemize}
 
-While spread is not indicative of liquidity but rather an absence of liquidity, we believe it is an important feature to include because all other things being equal, a change in spread is an important change in liquidity distribution for market participants. 
+The quantity is the number of quotes posted at each tick increment for $N$ price levels away from the best bid (ask) price. While all the LOBs analysed here have dozens of price levels of liquidity at any given moment, we focus on the first ten price levels, so $N=10$. Further more, even though a book's spread is not indicative of liquidity but rather an absence of liquidity, we believe it is an important feature to include because, all other things being equal, a change in spread is an important change in liquidity distribution for market participants. 
+
+\section{Change Point Analysis}
+Unlike the experiments in the previous chapter, we do not have the luxury of knowing when the distribution of liquidity will change for our time series. However, this is a more realistic situation where data is constantly streaming and a decision must be made about whether a change point has occurred. Therefore, we approach this situation mostly as an exploratory exercise for discovering interesting moments when the LOB liquidity has dramatically changed. Rather than use a suite of online change point methods, we'll focus on a single method for exploring this dataset, namely the NEWMA algorithm.
+
+\subsection{Changes in LOB Distribution}
+Given the date range of our datasets, we'd expect to see some significant liquidity changes in March and April of 2020 due to the covid-19 coronavirus that was the catalyst for a stock market crash \cite{gormsen2020coronavirus}. Simultaneously, there was an oil pricing war between Russia and Iran that caused an influx of supply into the market to drive down crude oil prices. This combined with little oil and gasoline consumption due to virus shut downs meant crude oil markets were also very turbulent \cite{albulescu2020coronavirus}.
+
+\subsection{Changes in Book Imbalance Distribution}
+
+
