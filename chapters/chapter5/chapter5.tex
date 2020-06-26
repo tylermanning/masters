@@ -45,7 +45,8 @@ Everytime a trade occurs or a resting limit order is cancelled at that price, si
 
 Every LOB has two configuration parameters: the tick size, $\pi >0$, which is the smallest possible price increment between orders at different prices and lot size, which dictates the smallest amount that can be traded. As mentioned in \cite{gould2016queue}, LOB is essentially a one-dimensional lattice where the dimension is price and every point on the price axis is a multiple \footnote{In most cases these multiples of $\pi$ are strictly positive but in particular markets, such as ED packs and bundles, there may be negative integers of $\pi$, i.e. a price axis with positive and negative prices.} of $\pi$.
 
-There are two possible distributional changes that are of interest. The first is how the entire distribution of liquidity changes over time. These changes are often associated with events happening in the market such as the start of U.S. trading hours, the release of economic data or a planned speech by the head of the federal reserve. There may also be unplanned events that affect the overall liquidity in the book such as a the 9/11 terrorist attack or a virus outbreak like the Corona virus.
+%There are two possible distributional changes that are of interest. 
+The point of interest with this data is detecting how the entire distribution of liquidity changes over time as shown in figure \ref{fig:book_img}. These changes are often associated with events happening in the market such as the start of U.S. trading hours, the release of economic data or a planned speech by the head of the federal reserve. There may also be unplanned events that affect the overall liquidity in the book such as a the 9/11 terrorist attack or a virus outbreak like the Corona virus.
 
 \begin{center} 
 \captionof{figure}[Change in Limit Order Book Liquidity]{The limit order book's liquidity drastically changes from (\textbf{left}) significant liquidity at time $t_1$ to (\textbf{right}) very little liquidity at time $t_2$.} 
@@ -55,7 +56,7 @@ There are two possible distributional changes that are of interest. The first is
 %\tiny
 \end{center}
 
-The second is how the distribution of the bid orders differs from the distribution of the ask orders. Typically, the distribution of liquidity on each side of the book is more or less symmetric. However, there have been studies that have shown times when there is an asymmetry between the two sides. This asymmetry has been shown to correlate to price changes \cite{gould2016queue}. This is equivalent to looking for changes in book imbalance.
+%The second is how the distribution of the bid orders differs from the distribution of the ask orders. Typically, the distribution of liquidity on each side of the book is more or less symmetric. However, there have been studies that have shown times when there is an asymmetry between the two sides. This asymmetry has been shown to correlate to price changes \cite{gould2016queue}. This is equivalent to looking for changes in book imbalance.
 
 
 \section{Dataset Construction}
@@ -91,6 +92,6 @@ Unlike the experiments in the previous chapter, we do not have the luxury of kno
 \subsection{Changes in LOB Distribution}
 Given the date range of our datasets, we'd expect to see some significant liquidity changes in March and April of 2020 due to the covid-19 coronavirus that was the catalyst for a stock market crash \cite{gormsen2020coronavirus}. Simultaneously, there was an oil pricing war between Russia and Iran that caused an influx of supply into the market to drive down crude oil prices. This combined with little oil and gasoline consumption due to virus shut downs meant crude oil markets were also very turbulent \cite{albulescu2020coronavirus}.
 
-\subsection{Changes in Book Imbalance Distribution}
+%\subsection{Changes in Book Imbalance Distribution}
 
 

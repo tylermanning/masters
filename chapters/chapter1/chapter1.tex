@@ -49,17 +49,17 @@ This thesis will concern itself with online change point detection, where data i
 
 
 \section{Our Contributions}
-The contributions of this work are several fold. First, to our knowledge, no paper has explored the state of the book over time or applied change point detection techniques to order book liquidity levels. Second, given the strong emphasis of theoretical results in the change point detection community, we test several, recent online kernel change point algorithms on synthetic data and real-world data. Classification error as well as time to detection are compared across the various methods. The focus of recent algorithms is on kernel methods such as KCUSUM, NEWMA and Mstats-CPD that will be discussed in detail in Chapter 3.
+The contributions of this work are several fold. First, to our knowledge, no paper has explored the state of the book over time or applied change point detection techniques to order book liquidity levels. Second, given the strong emphasis of theoretical results in the change point detection community, we test several, recent online kernel change point algorithms on several synthetic datasets. Expected detection delay, false alarm rate and missed detections are compared across the various methods. The focus of recent algorithms is on kernel methods such as KCUSUM, NEWMA and Scan-B that will be discussed in detail in chapter \ref{chapter3}. Thirdly, we demonstrate an online median algorithm that can be used for tuning the Gaussian kernel bandwidth when it's used for kernel change point detection. Several use cases where performance is superior with this online median bandwidth selection is shown as well. 
 
 \section{Chapter Overview}
-Below is short description of each chapter and its contents. Ideally, each chapter should be read chronologically, but effort has been made so that each chapter is as self-contained as possible.
+Below is short description of each chapter and its contents. %Ideally, each chapter should be read chronologically, but effort has been made so that each chapter is as self-contained as possible.
 
 Chapter 2 provides a background on hypothesis testing and its relation to the change point detection problem. The online change point problem is formulated along with measures for evaluating performance. The chapter closes out by reviewing classic methods for detecting change points on streaming data.
 
-Chapter 3 examines kernel change point detection as it is a focus of this thesis. A short background on the maximum mean discrepancy and its use in two-sample hypothesis tests is covered first. This is followed by a review of the most competitive online, kernel change point detection methods.
+Chapter 3 examines kernel change point detection as it is a focus of this thesis. A short background on the maximum mean discrepancy and its use in two-sample hypothesis tests is covered first. This is followed by a review of the most competitive online, kernel change point detection methods. It concludes with a novel way to estimate the kernel bandwidth for online methods.
 
-Chapter 4 constructs several synthetic datasets for experimentation. 
+Chapter 4 constructs several synthetic datasets for experimentation. Results are compared across several kernel change point methods and across several performance metrics. Particular use cases for the novel technique presented in the previous chapter are presented as well.
 
-Chapter 5 applies our change point detection algorithm to liquidity in financial markets. A model of the limit order book is presented and the construction of the financial dataset is explained.
+Chapter 5 applies a kernel change point detection algorithm to market liquidity in financial markets. A model of the limit order book is presented and the construction of the financial dataset is explained.
 
 Chapter 6 concludes the thesis by summarizing all the results and discussing future avenues for research.

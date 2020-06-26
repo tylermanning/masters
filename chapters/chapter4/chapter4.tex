@@ -59,7 +59,7 @@ See table \ref{Tab:synthetic} for a summary of each synthetic dataset.
 
 \section{Evaluation}
 \label{eval}
-Performance of each change point method is evaluated using the measures introduced in section \ref{perf}. Specifically, we compare the estimated expected detection delay, the number of false alarms, and the number of missed detections. For ease of visualization the number of false alarms are normalized by the total number of change points to detect, so we are actually plotting the false alarm rate in the following sections. All metrics are evaluated at a range of thresholds and the results are plotted below. 
+Performance of each change point method is evaluated using the measures introduced in section \ref{perf}. Specifically, we compare the estimated expected detection delay from equation \ref{est_edd}, the number of false alarms, and the number of missed detections. For ease of visualization the number of false alarms are normalized by the total number of change points to detect, so we are actually plotting the false alarm rate in the following sections. All metrics are evaluated at a range of thresholds and rather than a single threshold to draw better conclusions about the behaviour.
 
 The exact kernel change point algorithms used for comparison and their tunings are summarized in table \ref{algorithms}:
 
@@ -124,3 +124,15 @@ Finally as shown in \ref{fig:gauss_laplace_results}, the results of the Gaussian
 \end{center}
 
 \subsection{Rolling Median Use Cases}
+
+While the results of the previous section may seem like changing the median heuristic for the Gaussian kernel bandwidth to an online calculation, we present some particular use cases here where it is beneficial. Specifically, we setup some experiments that are particularly suitable for an online bandwidth estimation rather than a one-time estimation.
+
+The first experiment involves a mean shift similar to the first experiment presented in the previous. However, in this case the mean shifts will be sequential in nature with an upward trend. That is the first distribution is a $d=20$ dimensional normal sampled from $\mathcal{N}(0,1)$. The second distribution increments the mean by $1$ yielding $\mathcal{N}(1,1)$. This pattern continues for $500$ change points until the final distribution is $\mathcal{N}(499,1)$. The results of the experiment are shown in figure \ref{fig:seq_mean_results}. As we can see the EDD is better for the rolling median bandwidth version of Scan-B by about $5-10\%$ over the range of thresholds. This improvement comes at no cost to the amount of false alarms or missed detections.
+
+\begin{center} 
+\captionof{figure}[Evaluation Plots for Incremental Mean Shift change points]{Evaluation graphs for incremental mean shift change points, where expected detection delay (\textbf{top}), false alarm rate (\textbf{middle}), and missed detection rate (\textbf{bottom}) are plotted over a threshold region between $[1,1.2]$. } 
+\includegraphics[trim=0cm 1cm 0cm 1cm, clip, width=\textwidth]{seq_mean_shift} 
+\label{fig:seq_mean_results} 
+%\medskip
+%\tiny
+\end{center}

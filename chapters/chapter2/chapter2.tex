@@ -131,10 +131,11 @@ Alternatively, the second method of evaluating the delay of estimated change poi
 
 Because we will use EDD to assess performance in later chapters, it can be estimated by:
 \begin{equation}
-\widehat{\text{EDD}} = \sum_{i=1}^{|\operatorname{TP}|} \sum_{j=1}^{\hat{K}} \frac{\hat{t}_j - t_i^*}{|\operatorname{TP}|} \quad \quad \forall t^* \in \operatorname{TP}, \forall \hat{t} \in \hat{\mathcal{T}} \text{ s.t. }
+\label{est_edd}
+\widehat{\text{EDD}} = \sum_{i=1}^{|\operatorname{TP}|} \sum_{j=1}^{\hat{K}} \frac{\hat{t}_j - t_i^*}{|\operatorname{TP}|} \quad \quad \forall t^* \in \operatorname{TP}, \forall \hat{t} \in \hat{\mathcal{T}} \text{ s.t. } |\hat{t}_j - t_i^*| \leq M
 \end{equation} 
 
-Both TTFA and EDD are two sides of the same coin. Reducing the EDD also reduces the TTFA, which is good for the former and bad for the latter. The opposite is also true. Increasing TTFA, also increases the EDD. Therefore, minimizing the EDD is equivalent to maximizing TTFA. Optimizing one or the other may depend on the domain-specific application, where the practitioner may want to sacrifice one for the other. 
+Both TTFA and EDD are two sides of the same coin. Reducing the EDD also reduces the TTFA, which is good for the former and bad for the latter. The opposite is also true. Increasing TTFA, also increases the EDD. Optimizing one or the other may depend on the domain-specific application, where the practitioner may want to sacrifice one for the other. 
 %\begin{equation}
 % \text{Missed Detections = 100*\frac{\text{\# of missed changes}}{total change points}}
 % \end{equation}
