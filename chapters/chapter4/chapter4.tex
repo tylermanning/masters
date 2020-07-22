@@ -1,5 +1,6 @@
 \chapter{Experiments on Synthetic Data}
-In this chapter we cover what synthetic datasets are used and how they are constructed for evaluating the online kernel change point detection methods discussed in the previous chapter.
+In this chapter we cover what synthetic datasets are used and how they are constructed for evaluating the online kernel change point detection methods discussed in the previous chapter. All the results of the experiments are then presented in section \ref{eval}.
+
 \section{Setup}
 \label{experiments}
 \subsection{Initialization}
@@ -29,7 +30,7 @@ Inspired by recent papers \cite{chang2019kernel} and \cite{flynn2019change} that
 
 For a change in mean, a change point is inserted in the time series at some random time where the mean is shifted either positively or negatively. There are two variants to this scenario. In the first, the mean change is in all dimensions simultaneously. This is the most common experiment run by non-parametric change point detection models (add citation for this). In the second variation, the mean change is in only one dimension making it harder to detect. 
 
-For a change in variance, the distribution alternates between a Gaussian with $\mathcal{N}(0,1)$ to a Gaussian where the variance is scaled by a factor of 2 giving $\mathcal{N}(0,2)$. \hl{(Need to add more, variance change is not finalized)}
+For a change in variance, the distribution alternates between a Gaussian with $\mathcal{N}(0, I_{20})$ to a Gaussian where the variance is scaled by a factor of 2 giving $\mathcal{N}(0,2I_{20})$. Here $I_{20}$ denotes a $20 \times 20$ covariance identity matrix that only has diagonal elements all equal to $1$. 
 
 For a change between Gaussian mixtures, the data stream is setup identically to the synthetic tests ran in the NEWMA paper. One million samples are drawn from Gaussian Mixture Models (GMM) in dimension $d = 20$
 with $k = 10$ components. Every 2000 samples the GMM changes, i.e. $k$
@@ -74,8 +75,12 @@ The exact kernel change point algorithms used for comparison and their tunings a
 \end{tabular}
 \end{center}
 
+Notice we have not included the KCUSUM algorithm in the previous table. While we initially hoped to include this kernel change point algorithm in our experiments, this proved to be insufficient for a few reasons. The first is that KCUSUM is a semi-supervised algorithm so the reference distribution is assumed to be known whenever a new change point may arise. The testing setup can be modified to allow for this particular situation but this is unrealistic in a constantly flowing data stream. This leads into the second issue which is overall performance is hard to evaluate due to slack hyperparameter that is required for this algorithm. In cases where a suitable slack was set, the algorithm returned results that were always worse than the algorithms discussed in table \ref{algorithms}. In other cases, the algorithm was unable to detect any change points. Therefore, rather than repeat that KCUSUM did not perform as well as the other algorithms for each experiment, we decided to exclude it entirely. 
+
 \subsection{Synthetic Results}
 In figure \ref{fig:mean_shift_results}, the results of the mean shift are presented and we see that the rolling median heuristic version of the Scan-B algorithm is nearly equivalent to the standard version of Scan-B across the different metrics for the various thresholds. The NEWMA algorithm is significantly better than both for the EDD.
+
+\begin{minipage}{\textwidth}
 \begin{center} 
 \captionof{figure}[Evaluation Plots for Mean Shift Change points]{Evaluation graphs for mean shift change points, where expected detection delay (\textbf{top}), false alarm rate (\textbf{middle}), and missed detection rate (\textbf{bottom}) are plotted over a threshold region between $[1,1.2]$. } 
 \includegraphics[trim=0cm 1cm 0cm 1cm, clip, width=\textwidth]{mean_shift} 
@@ -84,9 +89,11 @@ In figure \ref{fig:mean_shift_results}, the results of the mean shift are presen
 %\tiny
 %(top) Daily stock prices (at closing) and (bottom) Daily returns on the stock (evaluated at closing) of Apple Inc. 
 \end{center}
+\end{minipage}
 
 The results of the second variant of the mean shift occurring in a single dimension is shown figure \ref{fig:single_mean_results}. They tell the same story as the previous mean shift experiment, where again the two versions of Scan-B yields a similar performance in all respects, with slightly better missed detection rate at certain thresholds for the rolling median heuristic method. The NEWMA algorithm is again about three times lower EDD with no drawbacks in the other metrics.
 
+\begin{minipage}{\textwidth}
 \begin{center} 
 \captionof{figure}[Evaluation Plots for change points of a Mean Shift in a Single Dimension]{Evaluation graphs for a mean shift in a single dimension, where expected detection delay (\textbf{top}), false alarm rate (\textbf{middle}), and missed detection rate (\textbf{bottom}) are plotted over a threshold region between $[1,1.2]$. } 
 \includegraphics[trim=0cm 1cm 0cm 1cm, clip, width=\textwidth]{single_mean} 
@@ -94,9 +101,23 @@ The results of the second variant of the mean shift occurring in a single dimens
 %\medskip
 %\tiny
 \end{center}
+\end{minipage}
+
+The worst performance of the rolling median heuristic version of Scan-B is presented in \ref{fig:variance_results}. The EDD is consistently worse across the different thresholds for the rolling Scan-B. While the false alarm rate is relatively still low, the algorithm missed many change points compared to NEWMA and the regular Scan-B algorithms, which did not miss any. This is a disappointing result because detecting changes in variance are a very common use case for change point detection models. Between NEWMA and regular Scan-B algorithms, both performed the same for missed detections and false alarms but NEWMA was considerably better in EDD with a more than $50\%$ improvement on average.
+
+\begin{minipage}{\textwidth}
+\begin{center} 
+\captionof{figure}[Evaluation Plots for change points of a Variance Shift]{Evaluation graphs for a variance shift, where expected detection delay (\textbf{top}), false alarm rate (\textbf{middle}), and missed detection rate (\textbf{bottom}) are plotted over a threshold region between $[1,1.2]$. } 
+\includegraphics[trim=0cm 1cm 0cm 1cm, clip, width=\textwidth]{variance} 
+\label{fig:variance_results} 
+%\medskip
+%\tiny
+\end{center}
+\end{minipage}
 
 In the next experiment of alternating between GMMs with the results shown in figure \ref{fig:gmm_results}, the performance of the rolling median Scan-B is not as good overall to the standard counterpart. The EDD is consistently worse across thresholds and the missed detections rise up as well as the thresholds widen, leading to the conclusion that the algorithm is not sensitive enough in this situation to pick up the changes in distribution. It is simply rarely making any detections, hence why there are almost no false alarms, but many missed detections.
 
+\begin{minipage}{\textwidth}
 \begin{center} 
 \captionof{figure}[Evaluation Plots for GMM change points]{Evaluation graphs for Gaussian mixture model change points, where expected detection delay (\textbf{top}), false alarm rate (\textbf{middle}), and missed detection rate (\textbf{bottom}) are plotted over a threshold region between $[1,1.2]$. } 
 \includegraphics[trim=0cm 1cm 0cm 1cm, clip, width=\textwidth]{gmm} 
@@ -104,8 +125,11 @@ In the next experiment of alternating between GMMs with the results shown in fig
 %\medskip
 %\tiny
 \end{center}
+\end{minipage}
 
 In figure \ref{fig:gauss_gmm_results}, the results are quite poor for the rolling median heuristic version of Scan-B. The false alarm rate is similar to the other kernel algorithms but the EDD and missed detections are considerably worse at various thresholds. The NEWMA algorithm and standard Scan-B are nearly identical across the board.
+
+\begin{minipage}{\textwidth}
 \begin{center} 
 \captionof{figure}[Evaluation Plots for Gaussian to GMM change points]{Evaluation graphs for Gaussian to Gaussian mixture model change points, where expected detection delay (\textbf{top}), false alarm rate (\textbf{middle}), and missed detection rate (\textbf{bottom}) are plotted over a threshold region between $[1,1.2]$. } 
 \includegraphics[trim=0cm 1cm 0cm 1cm, clip, width=\textwidth]{gauss_gmm} 
@@ -113,8 +137,11 @@ In figure \ref{fig:gauss_gmm_results}, the results are quite poor for the rollin
 %\medskip
 %\tiny
 \end{center}
+\end{minipage}
 
-Finally as shown in \ref{fig:gauss_laplace_results}, the results of the Gaussian to Laplace change points demonstrate that the rolling median variation is tradeoff between the false alarm rate and the missed detections as it is equivalent to the other methods in terms of EDD. Regular Scan-B and NEWMA are quite similar for this experiment with very minor differences at a few thresholds. 
+Finally as shown in \ref{fig:gauss_laplace_results}, the results of the Gaussian to Laplace change points demonstrate that the rolling median variation is tradeoff between the false alarm rate and the missed detections as it is equivalent to the other methods in terms of EDD. Regular Scan-B and NEWMA are quite similar for this experiment with very minor differences at a few thresholds.
+
+\begin{minipage}{\textwidth}
 \begin{center} 
 \captionof{figure}[Evaluation Plots for Gaussian to Laplace change points]{Evaluation graphs for Gaussian to Laplace change points, where expected detection delay (\textbf{top}), false alarm rate (\textbf{middle}), and missed detection rate (\textbf{bottom}) are plotted over a threshold region between $[1,1.2]$. } 
 \includegraphics[trim=0cm 1cm 0cm 1cm, clip, width=\textwidth]{gauss_laplace} 
@@ -122,6 +149,7 @@ Finally as shown in \ref{fig:gauss_laplace_results}, the results of the Gaussian
 %\medskip
 %\tiny
 \end{center}
+\end{minipage}
 
 \subsection{Rolling Median Use Cases}
 
@@ -129,6 +157,7 @@ While the results of the previous section may seem like changing the median heur
 
 The first experiment involves a mean shift similar to the first experiment presented in the previous. However, in this case the mean shifts will be sequential in nature with an upward trend. That is the first distribution is a $d=20$ dimensional normal sampled from $\mathcal{N}(0,1)$. The second distribution increments the mean by $1$ yielding $\mathcal{N}(1,1)$. This pattern continues for $500$ change points until the final distribution is $\mathcal{N}(499,1)$. The results of the experiment are shown in figure \ref{fig:seq_mean_results}. As we can see the EDD is better for the rolling median bandwidth version of Scan-B by about $5-10\%$ over the range of thresholds. This improvement comes at no cost to the amount of false alarms or missed detections.
 
+\begin{minipage}{\textwidth}
 \begin{center} 
 \captionof{figure}[Evaluation Plots for Incremental Mean Shift change points]{Evaluation graphs for incremental mean shift change points, where expected detection delay (\textbf{top}), false alarm rate (\textbf{middle}), and missed detection rate (\textbf{bottom}) are plotted over a threshold region between $[1,1.2]$. } 
 \includegraphics[trim=0cm 1cm 0cm 1cm, clip, width=\textwidth]{seq_mean_shift} 
@@ -136,3 +165,4 @@ The first experiment involves a mean shift similar to the first experiment prese
 %\medskip
 %\tiny
 \end{center}
+\end{minipage}
