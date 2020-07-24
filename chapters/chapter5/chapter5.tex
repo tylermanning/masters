@@ -103,7 +103,7 @@ The S\&P futures demonstrated the most consistent behaviour from the algorithm. 
 
 \begin{minipage}{0.96\textwidth}
 \begin{center} 
-\captionof{figure}[ES Liquidity Plots on April 1, 2020]{Liquidity for the CME S\&P 500 future contract is sampled every 10 sec from 7AM to 4PM on April 1, 2020 and plotted at the top five price levels on the bid side (\textbf{top}). For ease of visualization, only the liquidity for first four price levels on the bid side is shown. The NEWMA kernel change point algorithm is then applied to this data and the resulting kernel statistic is plotted over the same time interval (\textbf{bottom}). The book liquidity is low prior to the 9:30AM open and then exhibits a level shift. It remains at this new level for the course of the day until around 3PM as market participants begin adjusting their positions for the upcoming close.} 
+\captionof{figure}[ES Liquidity Plots on April 1, 2020]{Liquidity for the CME S\&P 500 future contract is sampled every 10 sec from 7AM to 4PM on April 1, 2020 and plotted at the top five price levels on the bid side (\textbf{top}). For ease of visualization, only the liquidity for the first five price levels on the bid side is shown. The NEWMA kernel change point algorithm is then applied to this data and the resulting kernel statistic is plotted over the same time interval (\textbf{bottom}). The book liquidity is low prior to the 9:30AM open and then exhibits a level shift. It remains at this new level for the course of the day until around 3PM as market participants begin adjusting their positions for the upcoming close.} 
 \includegraphics[trim=0cm 1cm 0cm 1cm, clip, width=\textwidth]{es_typical} 
 \label{fig:es_typical} 
 %\medskip
@@ -117,19 +117,19 @@ Regarding the 10-year U.S. treasury futures, the results were much more mixed an
 
 The Euro FX future demonstrated some interesting variations in liquidity. Figure \ref{fig:euro_fed_cuts} shows a very drastic imbalance between the two sides of the LOB. We speculate this change in liquidity distribution is a response to the policy changes announced by central banks on that day. The U.S. federal reserve, European central bank, and bank of Japan all announced interest rate cuts and quantitative easing in the wake of the coronavirus pandemic. Another example is shown in figure \ref{fig:euro_bid_fluc} where the bid side liquidity went through some noticeable changes over the course of the day. 
 
-\begin{minipage}{0.96\textwidth}
+%\begin{minipage}{0.96\textwidth}
 \begin{center} 
-\captionof{figure}[Euro FX Futures Liquidity Plots on March 16, 2020]{Liquidity for the CME Euro FX future contract is sampled every 10 sec from 7AM to 4PM on March 16, 2020 and plotted at the top four price levels on the bid side (\textbf{top}) and ask side (\textbf{middle}). For ease of visualization, only the liquidity for first five price levels is shown between 9AM and 4PM. The NEWMA kernel change point algorithm is then applied to this data and the resulting kernel statistic is plotted over the same time interval (\textbf{bottom}). }
+\captionof{figure}[Euro FX Futures Liquidity Plots on March 16, 2020]{Liquidity for the CME Euro FX future contract is sampled every 10 sec from 7AM to 4PM on March 16, 2020 and plotted at the top five price levels on the bid side (\textbf{top}) and ask side (\textbf{middle}). For ease of visualization, values are only plotted between 9AM and 4PM. The NEWMA kernel change point algorithm is then applied to this data and the resulting kernel statistic is plotted over the same time interval (\textbf{bottom}). }
 \includegraphics[trim=0cm 1cm 0cm 1cm, clip, width=\textwidth]{euro_fed_cuts} 
 \label{fig:euro_fed_cuts} 
 %\medskip
 %\tiny
 \end{center}
-\end{minipage}
+%\end{minipage}
 
 \begin{minipage}{0.96\textwidth}
 \begin{center} 
-\captionof{figure}[Euro FX Futures Liquidity Plots on March 24, 2020]{Liquidity for the CME Euro FX future contract is sampled every 10 sec from 7AM to 4PM on March 18, 2020 and plotted at the top four price levels on the bid side (\textbf{top}). For ease of visualization, only the liquidity for first five price levels on the bid side is shown between 11AM and 4PM. The NEWMA kernel change point algorithm is then applied to this data and the resulting kernel statistic is plotted over the same time interval (\textbf{bottom}). On this day, several European countries announced stimulus packages, including Italy, Germany and Spain.}
+\captionof{figure}[Euro FX Futures Liquidity Plots on March 24, 2020]{Liquidity for the CME Euro FX future contract is sampled every 10 sec from 7AM to 4PM on March 18, 2020 and plotted at the top five price levels on the bid side (\textbf{top}). For ease of visualization, only the liquidity for first five price levels on the bid side is shown between 11AM and 4PM. The NEWMA kernel change point algorithm is then applied to this data and the resulting kernel statistic is plotted over the same time interval (\textbf{bottom}). On this day, several European countries announced stimulus packages, including Italy, Germany and Spain.}
 \includegraphics[trim=0cm 1cm 0cm 1cm, clip, width=\textwidth]{euro_bid_change} 
 \label{fig:euro_bid_fluc} 
 %\medskip
@@ -141,7 +141,7 @@ Finally, the two commodity futures, crude oil and gold, exhibited some interesti
 
 \begin{minipage}{0.96\textwidth}
 \begin{center} 
-\captionof{figure}[Gold Futures Liquidity Plots on March 18, 2020]{Liquidity for the CME gold future contract is sampled every 10 sec from 7AM to 4PM on March 18, 2020 and plotted at the top four price levels on the bid side (\textbf{top}). For ease of visualization, only the liquidity for first five price levels on the bid side is shown. The NEWMA kernel change point algorithm is then applied to this data and the resulting kernel statistic is plotted over the same time interval (\textbf{bottom}). } 
+\captionof{figure}[Gold Futures Liquidity Plots on March 18, 2020]{Liquidity for the CME gold future contract is sampled every 10 sec from 7AM to 4PM on March 18, 2020 and plotted at the top five price levels on the bid side (\textbf{top}). For ease of visualization, only the liquidity for first five price levels on the bid side is shown. The NEWMA kernel change point algorithm is then applied to this data and the resulting kernel statistic is plotted over the same time interval (\textbf{bottom}). } 
 \includegraphics[trim=0cm 1cm 0cm 1cm, clip, width=\textwidth]{gc_fluc} 
 \label{fig:gc_fluc} 
 %\medskip
