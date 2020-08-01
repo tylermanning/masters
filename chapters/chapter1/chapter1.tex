@@ -43,13 +43,13 @@ The second factor is deciding whether change points should be detected \textit{o
 
 The third factor is determining if there are multiple change points or only one change point to detect. This is an important  factor for offline change point detection where the decision to detect one or more change points is often chosen at the outset \cite{jandhyala2013inference}.  Detecting multiple change points could also be relevant for the online case if a situation arises where the window of time series under consideration may contain more than one change point. However, most online change point methods are designed to detect a single change point at a time.
 
-Finally, the last factor to address is determining what statistical changes a change point detection algorithm should detect. Many methods focus solely on detecting changes in the mean of a distribution \cite{lee2010change} or changes in variance \cite{hawkins2005change} \cite{inclan1994use}. Methods like kernel change point detection do not focus on detecting a specific statistical parameter, but rather detecting that a change occurred in some moment of the distribution \cite{arlot2019kernel}. This is especially useful in situations where very little is known about the data.
+Finally, the last factor to address is determining what statistical changes a detection algorithm should detect. Many methods focus solely on detecting changes in the mean of a distribution \cite{lee2010change} or changes in variance \cite{hawkins2005change} \cite{inclan1994use}. Methods like kernel change point detection do not focus on detecting a specific statistical parameter, but rather detecting that a change occurred in some moment of the distribution \cite{arlot2019kernel}. This is especially useful in situations where very little is known about the data.
 
 This thesis will concern itself with online change point detection, where data is received in a streaming nature. We assume no prior distributional characteristics on the data and operate in a completely non-parametric setting. 
 
 
 \section{Our Contributions}
-The contributions of this work are several fold. First, to our knowledge, no paper has explored the state of the book over time or applied change point detection techniques to order book liquidity levels. Second, given the strong emphasis of theoretical results in the change point detection community, we test several, recent online kernel change point algorithms on several synthetic datasets. Expected detection delay, false alarm rate and missed detections are compared across the various methods. The focus of recent algorithms is on kernel methods such as KCUSUM, NEWMA and Scan-B that will be discussed in detail in chapter \ref{chapter3}. Thirdly, we demonstrate an online median algorithm that can be used for tuning the Gaussian kernel bandwidth when it's used for kernel change point detection. Several use cases where performance is superior with this online median bandwidth selection is shown as well. 
+The contributions of this work are several fold. First, to our knowledge, no paper has applied change point techniques to a financial instrument's market liquidity by evaluation of regime changes in the limit order book (LOB). Second, given the strong emphasis of theoretical results in the change point detection community, we test several, recent online kernel change point algorithms on several synthetic datasets. Expected detection delay, false alarm rate and missed detections are compared across the various methods. The focus of recent algorithms is on kernel methods such as KCUSUM, NEWMA and Scan-B that will be discussed in detail in chapter \ref{chapter3}. Thirdly, we demonstrate an online median algorithm that can be used for tuning the Gaussian kernel bandwidth when it's used for kernel change point detection. Several use cases where performance is superior with this online median bandwidth selection is shown as well. 
 
 \section{Chapter Overview}
 Below is a short description of each chapter and its contents. %Ideally, each chapter should be read chronologically, but effort has been made so that each chapter is as self-contained as possible.
@@ -63,9 +63,3 @@ Chapter 4 constructs several synthetic datasets for experimentation. Results are
 Chapter 5 applies a kernel change point detection algorithm to market liquidity in financial markets. A model of the limit order book is presented and the construction of the financial dataset is explained.
 
 Chapter 6 concludes the thesis by summarizing all the results and discussing future avenues for research.
-
-%    \begin{center}
-%        \input{toy_gauss.pgf}
-%    \end{center}
-    
-
