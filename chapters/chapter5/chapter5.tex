@@ -1,8 +1,21 @@
 \chapter{Application to Market Liquidity}
-In this chapter we apply a kernel change point detection algorithm to market data acquired from the Chicago Mercantile Exchange (CME). Background on the specific characteristics of data is provided in section \ref{prop_book}, as well as how the datasets are constructed in section \ref{liq_data_construction}. We then summarize the results with exploratory plots and discussion in section \ref{cp_analysis}.
+In this chapter we apply a kernel change point detection algorithm to market data acquired from the Chicago Mercantile Exchange (CME). A short review of related work is covered in section \ref{related_work}. Background on the specific characteristics of data is provided in section \ref{prop_book}, as well as how the datasets are constructed in section \ref{liq_data_construction}. We then summarize the results with exploratory plots and discussion in section \ref{cp_analysis}.
 
 \section{Motivation}
-In finance, \textit{market liquidity} describes how quickly a market participant may buy or sell an asset without causing significant fluctuations in the price. In liquid markets, there is minimal impact to the price by quickly buying (selling) it. In illiquid markets, a purchase (sale) of the asset will cause the price to rise (fall) resulting in adverse price selection if the buyer (seller) is making a large transaction. In both cases, market liquidity is in constant fluctuation. By detecting changes in market liquidity a market participant can identify periods of when trading may be more or less favourable. For example, an institutional investor wishing to unwind a large position over the course of several days may want to quickly detect rapid changes in liquidity that could negatively impact their execution strategy. Framing liquidity changes over time as an online change point detection problem is the focus of this chapter. We begin with a description of the limit order book based on the notation used in \cite{gould2016queue}. 
+In finance, \textit{market liquidity} describes how quickly a market participant may buy or sell an asset without causing significant fluctuations in the price. In liquid markets, there is minimal impact to the price by quickly buying (selling) it. In illiquid markets, a purchase (sale) of the asset will cause the price to rise (fall) resulting in adverse price selection if the buyer (seller) is making a large transaction. In both cases, market liquidity is in constant fluctuation. By detecting changes in market liquidity a market participant can identify periods of when trading may be more or less favourable. 
+
+One example is a market participant who is particularly sensitive to \textit{market liquidity risk}. Market liquidity risk is the loss incurred when a market participant wishes to execute a trade or eliminate a position while not hitting the
+market price \cite{basel2008principles}. The greater the sparsity in a market, the greater the market liquidity risk at the time of trade.  For example, an institutional investor wishing to buy a large position over the course of several days may want to quickly detect low levels in liquidity that could cause them to lift the price inadvertently, resulting in adverse price selection on subsequent executions of their trade. Framing liquidity changes over time as an online change point detection problem is the focus of this chapter. We begin with a broad review of some related studies on market liquidity.
+
+\section{Related Work}
+\label{related_work}
+A substantial portion of the market liquidity literature focuses on equity markets. For example, market liquidity and trading volume around equity earnings announcements is explored in \cite{kim1994market}. In \cite{chordia2001market}, an aggregate view of market liquidity using transaction data is presented over an eleven year period where the authors found market volatility, short and long term interest rates, the day of the week, and recent market movements were variables that affected market liquidity. Other studies have focused on the how market liquidity changes can be indicative of shifts in market sentiment \cite{baker2004market} \cite{fang2009stock} \cite{debata2018investor}.
+
+Another focus in the literature how market liquidity shocks can affect bond prices. This is especially important when pricing government bonds as they are often used as an indicator for economic health \cite{zaloom2009read}. Countries that have been studied in this context include the U.S. \cite{mccauley2000iv}, Canada \cite{gungor2017has}, Denmark \cite{dick2013funding}, and Japan \cite{sakiyama2016market}. Liquidity risks have also been analysed in the pricing of corporate bond markets as well \cite{de2012liquidity}. Finally, a detailed reference on the subject of optimal execution and how it can impact market liquidity can be found in \cite{gueant2016financial}.
+
+It should be noted that any studies that were done before the new millennium were done before the widespread use of electronic trading platforms. Also, due to the financial crisis between 2007-2008, many new regulations were put into place to reduce systemic risk in the markets. Therefore, any studies prior to these dates may no longer be applicable in the current environment. See  \cite{adrian2017market} and \cite{trebbi2019regulation} for the impacts that U.S. regulations have had on the liquidity of the U.S. fixed income market since 2008.
+
+To our knowledge, no paper has studied intraday changes in market liquidity, especially from a change point detection perspective. While intraday fluctuations are noisy, we believe drastic changes in market liquidity occur at this level of granularity. Before describing the specific datasets, a detailed description of the limit order book is provided based on the notation used in \cite{gould2016queue}. 
 
 \section{Properties of the Limit Order Book}
 \label{prop_book}
@@ -52,17 +65,17 @@ Everytime a trade occurs or a resting limit order is cancelled or filled at a pr
 
 Every LOB has a configuration parameter known as the \textit{tick size} denoted by $\pi >0$, which is the smallest possible price increment between two orders at different prices. As mentioned in \cite{gould2016queue}, LOB is essentially a one-dimensional lattice where the dimension is price and every point on the price axis is a multiple\footnote{In most cases these multiples of $\pi$ are strictly positive but in particular markets there may be negative integers of $\pi$, i.e. a price axis with positive and negative prices.} of $\pi$.
 
-The point of interest with this data is detecting how the entire distribution of liquidity changes over time as shown in figure \ref{fig:book_img}. These changes are often associated with events happening in the market such as the start of U.S. trading hours, the release of economic data or a planned speech by the chairman of the federal reserve. There may also be unplanned events that affect the overall liquidity in the book such as a the 9/11 terrorist attack or a virus outbreak like the covid-19 virus in 2020.
+The point of interest with this data is detecting how the entire distribution of liquidity changes over time as shown in figure \ref{fig:book_img}. These changes are often associated with events happening in the market such as the start of U.S. trading hours, the release of economic data or a planned speech by the chairman of the federal reserve. There may also be unplanned events that affect the overall liquidity in the book such as a terrorist attack or a virus outbreak like the covid-19 virus in 2020.
 
-\begin{minipage}{0.96\textwidth}
+%\begin{minipage}{0.96\textwidth}
 \begin{center} 
-\captionof{figure}[Change in Limit Order Book Liquidity]{The limit order book's liquidity drastically changes from a significant amount of liquidity at time $t_1$  (\textbf{left}) to a low amount of liquidity at time $t_2$ (\textbf{right}).} 
+\captionof{figure}[Change in Limit Order Book Liquidity]{The limit order book's liquidity drastically changes from a significant amount of liquidity at time $t_1$  (\textbf{left}) to a low amount of liquidity at time $t_2$ (\textbf{right}). In this case, detecting when the LOB liquidity changes as soon as possible is vital for a market participant that wants to avoid market liquidity risk.} 
 \ctikzfig{book_drawdown}
 \label{fig:book_img} 
 %\medskip
 %\tiny
 \end{center}
-\end{minipage}
+%\end{minipage}
 
 %The second is how the distribution of the bid orders differs from the distribution of the ask orders. Typically, the distribution of liquidity on each side of the book is more or less symmetric. However, there have been studies that have shown times when there is an asymmetry between the two sides. This asymmetry has been shown to correlate to price changes \cite{gould2016queue}. This is equivalent to looking for changes in book imbalance.
 
