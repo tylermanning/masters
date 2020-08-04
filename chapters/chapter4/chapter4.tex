@@ -60,7 +60,7 @@ See table \ref{Tab:synthetic} for a summary of each synthetic dataset.
 
 \section{Evaluation}
 \label{eval}
-Performance of each change point method is evaluated using the measures introduced in section \ref{perf}. Specifically, we compare the estimated expected detection delay from equation \ref{est_edd}, the number of false alarms, and the number of missed detections. For ease of visualization the number of false alarms are normalized by the total number of change points to detect, so we are actually plotting the false alarm rate in the following sections. All metrics are evaluated at a range of thresholds and rather than a single threshold to draw better conclusions about the behaviour.
+Performance of each change point method is evaluated using the measures introduced in section \ref{perf}. Specifically, we compare the estimated expected detection delay from equation \ref{est_edd}, the number of false alarms, and the number of missed detections. For ease of visualization the number of false alarms and missed detections are normalized by the total number of change points to detect, so we are actually plotting the false alarm rate and missed detection rate as percentages in the following sections. All metrics are evaluated at a range of thresholds rather than a single threshold to draw better conclusions about the behaviour.
 
 The exact kernel change point algorithms used for comparison and their tunings are summarized in table \ref{algorithms}:
 
@@ -80,7 +80,7 @@ Notice we have not included the KCUSUM algorithm in the previous table. While we
 \subsection{Synthetic Results}
 In figure \ref{fig:mean_shift_results}, the results of the mean shift are presented and we see that the rolling median heuristic version of the Scan-B algorithm is nearly equivalent to the standard version of Scan-B across the different metrics for the various thresholds. The NEWMA algorithm is significantly better than both for the EDD.
 
-\begin{minipage}{\textwidth}
+%\begin{minipage}{\textwidth}
 \begin{center} 
 \captionof{figure}[Evaluation Plots for Mean Shift Change points]{Evaluation graphs for mean shift change points, where expected detection delay (\textbf{top}), false alarm rate (\textbf{middle}), and missed detection rate (\textbf{bottom}) are plotted over a threshold region between $[1,1.2]$. } 
 \includegraphics[trim=0cm 1cm 0cm 1cm, clip, width=\textwidth]{mean_shift} 
@@ -89,7 +89,7 @@ In figure \ref{fig:mean_shift_results}, the results of the mean shift are presen
 %\tiny
 %(top) Daily stock prices (at closing) and (bottom) Daily returns on the stock (evaluated at closing) of Apple Inc. 
 \end{center}
-\end{minipage}
+%\end{minipage}
 
 The results of the second variant of the mean shift occurring in a single dimension is shown figure \ref{fig:single_mean_results}. They tell the same story as the previous mean shift experiment, where again the two versions of Scan-B yields a similar performance in all respects, with slightly better missed detection rate at certain thresholds for the rolling median heuristic method. The NEWMA algorithm is again about three times lower EDD with no drawbacks in the other metrics.
 
