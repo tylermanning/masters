@@ -151,13 +151,31 @@ Finally as shown in \ref{fig:gauss_laplace_results}, the results of the Gaussian
 \end{center}
 \end{minipage}
 
-\subsection{Rolling Median Use Cases}
+In table \ref{Tab:synthetic_results_table}, a summary of which algorithm performed best for each experiment across each metric is shown. Overall, the NEWMA change point algorithm was the most consistent having the lowest EDD and was still competitive among the other metrics. While it might seem like the performance of our novel online bandwidth selection for the Scan-B Gaussian kernel was inferior overall, this would be a premature conclusion because it was still fairly comparable to the standard Scan-B counterpart and was not worse on a variety of datasets. This means it can compete with these algorithms nonetheless. For this reason, we decided to create a specific situation where the online bandwidth selection for the Gaussian kernel may be particularly effective. This use case is presented in the next section.
+
+\begin{minipage}{\textwidth}
+\begin{center}
+\captionof{table}{Synthetic Results Summary}
+\begin{tabular}{SSSSSS} \toprule
+    {Type of Change} & {EDD} & {False Alarm} & {Missed Detection}  \\ \midrule
+    {Mean (all dimensions)}  & {NEWMA} & {All} & {NEWMA}  \\
+    {Mean (single dimension)}  & {NEWMA}  & {All} & {Rolling Scan-B}  \\
+    {Variance}  & {NEWMA}  & {NEWMA/Scan-B}  & {NEWMA/Scan-B}   \\
+    {GMMs}  & {NEWMA} & {Rolling Scan-B}  & {NEWMA/Scan-B}   \\ 
+    {Normal to GMM}  & {NEWMA}  & {All}  & {NEWMA/Scan-B}   \\ 
+    {Normal to Laplace} &  {NEWMA} & {Rolling Scan-B}  & {NEWMA/Scan-B}    \\ \bottomrule
+\end{tabular}
+ \label{Tab:synthetic_results_table}
+\end{center}
+\end{minipage}
+
+\subsection{Rolling Median Use Case}
 
 While the results of the previous section may seem like changing the median heuristic for the Gaussian kernel bandwidth to an online calculation, we present some particular use cases here where it is beneficial. Specifically, we setup some experiments that are particularly suitable for an online bandwidth estimation rather than a one-time estimation.
 
 The first experiment involves a mean shift similar to the first experiment presented in the previous. However, in this case the mean shifts will be sequential in nature with an upward trend. That is the first distribution is a $d=20$ dimensional normal sampled from $\mathcal{N}(0,1)$. The second distribution increments the mean by $1$ yielding $\mathcal{N}(1,1)$. This pattern continues for $500$ change points until the final distribution is $\mathcal{N}(499,1)$. The results of the experiment are shown in figure \ref{fig:seq_mean_results}. As we can see the EDD is better for the rolling median bandwidth version of Scan-B by about $5-10\%$ over the range of thresholds. This improvement comes at no cost to the amount of false alarms or missed detections.
 
-%\begin{minipage}{\textwidth}
+\begin{minipage}{\textwidth}
 \begin{center} 
 \captionof{figure}[Evaluation Plots for Incremental Mean Shift change points]{Evaluation graphs for incremental mean shift change points, where expected detection delay (\textbf{top}), false alarm rate (\textbf{middle}), and missed detection rate (\textbf{bottom}) are plotted over a threshold region between $[1,1.2]$. } 
 \includegraphics[trim=0cm 1cm 0cm 1cm, clip, width=\textwidth]{seq_mean_shift} 
@@ -165,4 +183,4 @@ The first experiment involves a mean shift similar to the first experiment prese
 %\medskip
 %\tiny
 \end{center}
-%\end{minipage}
+\end{minipage}
